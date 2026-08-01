@@ -1,0 +1,2572 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+ <meta charset="UTF-8">
+ <!-- إضافة interactive-widget لحل مشكلة تعليق الكيبورد في الموبايل -->
+ <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
+ 
+ <!-- ربط ملفات الـ PWA -->
+ <link rel="manifest" href="manifest.json">
+ <meta name="theme-color" content="#10b981">
+ <link rel="apple-touch-icon" href="icon.png">
+
+ <title>المساعد الصحي الذكي - Ultra UX Edition</title>
+ <style>
+ /* ==================== نظام الألوان والتصميم الزجاجي العالمي (Glassmorphism & Obsidian Dark) ==================== */
+ :root {
+   --bg-body: #080c14;
+   --bg-card: rgba(30, 41, 59, 0.55);
+   --bg-card-hover: rgba(30, 41, 59, 0.75);
+   --bg-input: rgba(15, 23, 42, 0.65);
+   --glass-border: rgba(255, 255, 255, 0.08);
+   --glass-border-glow: rgba(16, 185, 129, 0.25);
+   
+   --text-main: #f8fafc;
+   --text-sub: #94a3b8;
+   
+   --accent-primary: #10b981;
+   --accent-primary-glow: rgba(16, 185, 129, 0.35);
+   --accent-hover: #059669;
+   --accent-protein: #3b82f6;
+   --accent-carbs: #f59e0b;
+   --accent-fats: #ef4444;
+   --accent-purple: #8b5cf6;
+   
+   --btn-voice: linear-gradient(135deg, #3b82f6, #1d4ed8);
+   --btn-img: linear-gradient(135deg, #10b981, #047857);
+   --grid-empty: rgba(30, 41, 59, 0.4);
+   
+   --shadow-card: 0 12px 32px rgba(0, 0, 0, 0.35);
+   --shadow-glow: 0 0 20px rgba(16, 185, 129, 0.15);
+   --radius-card: 24px;
+   --radius-pill: 999px;
+
+   /* ألوان زر الكبسولة التفاعلي - الوضع الليل الافتراضي */
+   --track-bg: #0f172a;
+   --track-border: #1e293b;
+   --knob-bg: #e2e8f0;
+   --knob-shadow: rgba(226, 232, 240, 0.25);
+ }
+
+ html.light-theme, body.light-theme {
+   --bg-body: #f1f5f9;
+   --bg-card: rgba(255, 255, 255, 0.75);
+   --bg-card-hover: rgba(255, 255, 255, 0.9);
+   --bg-input: rgba(241, 245, 249, 0.8);
+   --glass-border: rgba(0, 0, 0, 0.06);
+   --glass-border-glow: rgba(16, 185, 129, 0.2);
+   
+   --text-main: #0f172a;
+   --text-sub: #64748b;
+   --grid-empty: #e2e8f0;
+   --shadow-card: 0 10px 25px rgba(0, 0, 0, 0.05);
+   --shadow-glow: 0 0 15px rgba(16, 185, 129, 0.1);
+
+   /* ألوان زر الكبسولة التفاعلي - الوضع النهار */
+   --track-bg: #38bdf8;
+   --track-border: #0284c7;
+   --knob-bg: #fbbf24;
+   --knob-shadow: rgba(251, 191, 36, 0.4);
+ }
+
+ html, body { 
+   background-color: var(--bg-body) !important; 
+   color: var(--text-main); 
+   min-height: 100dvh; 
+   overscroll-behavior: none; 
+   -webkit-text-size-adjust: 100%;
+ }
+
+ * { 
+   box-sizing: border-box; 
+   margin: 0; 
+   padding: 0; 
+   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+   -webkit-tap-highlight-color: transparent;
+ }
+
+ body { 
+   padding: 0 16px 28px 16px; 
+   line-height: 1.6; 
+   overflow-x: hidden; 
+   touch-action: manipulation; 
+   background: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.08) 0%, transparent 60%), var(--bg-body);
+ }
+
+ body.modal-open { overflow: hidden !important; }
+ 
+ .container { max-width: 480px; margin: 0 auto; }
+
+ textarea, input {
+   font-size: 16px !important; 
+   -webkit-appearance: none;
+   outline: none;
+   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+ }
+
+ textarea:focus, input:focus { 
+   border-color: var(--accent-primary) !important; 
+   box-shadow: 0 0 0 3px var(--accent-primary-glow);
+ }
+
+ #mealInput { touch-action: auto !important; }
+
+ /* Header Styling Glassmorphism */
+ header { 
+   position: sticky; 
+   top: 0; 
+   z-index: 1000; 
+   background: var(--bg-card); 
+   backdrop-filter: blur(16px);
+   -webkit-backdrop-filter: blur(16px);
+   padding: 12px 16px; 
+   margin: 0 -16px 18px -16px;
+   display: flex; 
+   justify-content: space-between; 
+   align-items: center; 
+   border-bottom: 1px solid var(--glass-border); 
+   transform: translateZ(0);
+   will-change: transform;
+ }
+ .header-left { display: flex; align-items: center; gap: 12px; }
+
+ .menu-toggle-btn { 
+   background: var(--bg-input); 
+   color: var(--text-main); 
+   border: 1px solid var(--glass-border); 
+   font-size: 1.2rem; 
+   padding: 6px 12px; 
+   border-radius: 12px; 
+   cursor: pointer; 
+   transition: transform 0.15s ease;
+ }
+ .menu-toggle-btn:active { transform: scale(0.92); }
+
+ header h1 { 
+   font-size: 1.1rem; 
+   color: var(--text-main); 
+   font-weight: 800; 
+   letter-spacing: -0.3px;
+   display: flex;
+   align-items: center;
+   gap: 6px;
+ }
+ header h1 span { color: var(--accent-primary); }
+
+ /* ==================== تصاميم زر الكبسولة التفاعلي المتقدم ==================== */
+ .toggle-capsule {
+   position: relative;
+   width: 68px;
+   height: 34px;
+   background-color: var(--track-bg);
+   border: 1.5px solid var(--track-border);
+   border-radius: 20px;
+   cursor: pointer;
+   overflow: hidden;
+   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+   transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.5s;
+   outline: none;
+   -webkit-tap-highlight-color: transparent;
+   direction: ltr;
+ }
+
+ .bg-element {
+   position: absolute;
+   inset: 0;
+   pointer-events: none;
+ }
+
+ /* غيوم النهار */
+ .cloud {
+   position: absolute;
+   fill: #ffffff;
+   opacity: 0.9;
+   transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s;
+ }
+ .cloud-1 { top: 7px; right: 7px; width: 17px; }
+ .cloud-2 { bottom: 4px; right: 16px; width: 13px; opacity: 0.6; }
+
+ body:not(.light-theme) .cloud {
+   transform: translateY(30px);
+   opacity: 0;
+ }
+
+ /* نجوم الليل */
+ .star {
+   position: absolute;
+   fill: #fbbf24;
+   opacity: 0;
+   transform: scale(0) rotate(0deg);
+   transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s;
+ }
+ .star-1 { top: 5px; left: 9px; width: 6px; transition-delay: 0.1s; }
+ .star-2 { bottom: 7px; left: 20px; width: 5px; transition-delay: 0.2s; }
+ .star-3 { top: 15px; left: 26px; width: 6px; transition-delay: 0.15s; }
+
+ body:not(.light-theme) .star {
+   opacity: 1;
+   transform: scale(1) rotate(180deg);
+ }
+
+ /* الكرة التدحرجية (الشمس / القمر) */
+ .knob {
+   position: absolute;
+   top: 3px;
+   left: 3px;
+   width: 25px;
+   height: 25px;
+   background-color: var(--knob-bg);
+   border-radius: 50%;
+   box-shadow: 0 0 8px var(--knob-shadow);
+   transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55), background-color 0.5s, box-shadow 0.5s;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+ }
+
+ /* انزلاق الكرة لليمين في وضع النهار */
+ body.light-theme .knob {
+   transform: translateX(34px) rotate(360deg);
+ }
+
+ /* أشعة الشمس */
+ .sun-rays {
+   position: absolute;
+   width: 100%;
+   height: 100%;
+   stroke: #f59e0b;
+   stroke-width: 2.5;
+   stroke-linecap: round;
+   transition: transform 0.4s ease, opacity 0.3s;
+   transform-origin: center;
+   opacity: 0;
+   transform: scale(0) rotate(-90deg);
+ }
+
+ body.light-theme .sun-rays {
+   opacity: 1;
+   transform: scale(1) rotate(0deg);
+ }
+
+ /* فوهات القمر */
+ .moon-craters {
+   position: absolute;
+   width: 100%;
+   height: 100%;
+   opacity: 1;
+   transform: scale(1);
+   transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+ }
+
+ .crater { fill: #94a3b8; }
+
+ body.light-theme .moon-craters {
+   opacity: 0;
+   transform: scale(0);
+ }
+
+ /* Sidebar Menu */
+ .sidebar-overlay { 
+   position: fixed; 
+   top: 0; 
+   left: 0; 
+   width: 100%; 
+   height: 100%; 
+   background: rgba(0, 0, 0, 0.7); 
+   backdrop-filter: blur(4px);
+   z-index: 1001; 
+   display: none; 
+ }
+
+ .sidebar-menu { 
+   position: fixed; 
+   top: 0; 
+   right: 0; 
+   width: 85%; 
+   max-width: 320px; 
+   height: 100%; 
+   background: var(--bg-card); 
+   backdrop-filter: blur(24px);
+   -webkit-backdrop-filter: blur(24px);
+   z-index: 1002; 
+   box-shadow: -8px 0 32px rgba(0,0,0,0.5); 
+   padding: 20px 16px; 
+   transform: translate3d(100%, 0, 0); 
+   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1); 
+   will-change: transform;
+   overflow-y: auto; 
+   border-left: 1px solid var(--glass-border); 
+ }
+ .sidebar-menu.open { transform: translate3d(0, 0, 0); }
+
+ .sidebar-header { 
+   display: flex; 
+   justify-content: space-between; 
+   align-items: center; 
+   margin-bottom: 18px; 
+   padding-bottom: 10px; 
+   border-bottom: 1px solid var(--glass-border); 
+ }
+ .sidebar-header h2 { font-size: 1.05rem; color: var(--accent-primary); font-weight: 800; }
+
+ .close-sidebar-btn { 
+   background: var(--bg-input); 
+   border: 1px solid var(--glass-border); 
+   color: var(--text-main); 
+   font-size: 1rem; 
+   width: 32px;
+   height: 32px;
+   border-radius: 50%;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   cursor: pointer; 
+ }
+
+ .sidebar-section { margin-bottom: 18px; }
+ .sidebar-section label { display: block; font-size: 0.82rem; color: var(--text-sub); margin-bottom: 6px; font-weight: 700; }
+
+ .sidebar-input { 
+   width: 100%; 
+   padding: 10px; 
+   border-radius: 12px; 
+   border: 1px solid var(--glass-border); 
+   background: var(--bg-input); 
+   color: var(--text-main); 
+   font-size: 16px !important; 
+   margin-bottom: 8px; 
+ }
+
+ .sidebar-btn { 
+   width: 100%; 
+   padding: 10px; 
+   background: var(--bg-input); 
+   color: var(--text-main); 
+   border: 1px solid var(--glass-border); 
+   border-radius: 12px; 
+   cursor: pointer; 
+   font-size: 0.82rem; 
+   font-weight: 700; 
+   text-align: center; 
+   display: flex; 
+   align-items: center; 
+   justify-content: center; 
+   gap: 6px; 
+   margin-bottom: 8px; 
+   transition: transform 0.15s ease, opacity 0.15s ease;
+ }
+ .sidebar-btn:active { transform: scale(0.96); opacity: 0.9; }
+
+ /* Calendar / Monthly Grid */
+ .month-nav { 
+   display: flex; 
+   justify-content: space-between; 
+   align-items: center; 
+   margin-bottom: 10px; 
+   background: var(--bg-input); 
+   padding: 8px 12px; 
+   border-radius: 12px; 
+   border: 1px solid var(--glass-border); 
+ }
+ .month-nav-btn { background: transparent; border: none; color: var(--accent-primary); font-size: 1rem; cursor: pointer; padding: 2px 6px; font-weight: bold; }
+ .month-title { font-size: 0.88rem; font-weight: 700; color: var(--text-main); }
+
+ .monthly-grid-wrapper { overflow: hidden; position: relative; width: 100%; border-radius: 12px; }
+ .monthly-grid { 
+   display: grid; 
+   grid-template-columns: repeat(5, 1fr); 
+   gap: 6px; 
+   margin-top: 4px; 
+   touch-action: pan-y; 
+   transition: transform 0.2s ease-out, opacity 0.2s ease-out; 
+   width: 100%; 
+ }
+ .slide-out-left { transform: translate3d(-100%, 0, 0); opacity: 0; }
+ .slide-out-right { transform: translate3d(100%, 0, 0); opacity: 0; }
+ .slide-in-left { transform: translate3d(-100%, 0, 0); opacity: 0; }
+ .slide-in-right { transform: translate3d(100%, 0, 0); opacity: 0; }
+
+ .day-box { 
+   padding: 8px 3px; 
+   border-radius: 10px; 
+   text-align: center; 
+   font-size: 0.7rem; 
+   font-weight: 700; 
+   color: white; 
+   border: 1px solid var(--glass-border); 
+   transition: transform 0.15s ease;
+ }
+ .day-box:active { transform: scale(0.92); }
+ .day-box.green { background-color: rgba(16, 185, 129, 0.85); box-shadow: 0 0 10px rgba(16, 185, 129, 0.3); }
+ .day-box.red { background-color: rgba(239, 68, 68, 0.85); box-shadow: 0 0 10px rgba(239, 68, 68, 0.3); }
+ .day-box.empty { background-color: var(--grid-empty); color: var(--text-sub); }
+ .day-box .day-num { font-size: 0.72rem; display: block; margin-bottom: 2px; opacity: 0.9; }
+
+ /* Main Glass Cards */
+ .daily-summary, .input-card, .history-card { 
+   background: var(--bg-card); 
+   backdrop-filter: blur(20px);
+   -webkit-backdrop-filter: blur(20px);
+   border-radius: var(--radius-card); 
+   padding: 20px 18px; 
+   margin-bottom: 18px; 
+   border: 1px solid var(--glass-border); 
+   box-shadow: var(--shadow-card); 
+   transform: translateZ(0); 
+ }
+
+ .result-card { 
+   display: none; 
+   background: var(--bg-card); 
+   backdrop-filter: blur(20px);
+   -webkit-backdrop-filter: blur(20px);
+   border-radius: var(--radius-card); 
+   padding: 20px 18px; 
+   margin-bottom: 18px; 
+   border: 1px solid var(--accent-primary-glow); 
+   box-shadow: var(--shadow-card), var(--shadow-glow); 
+   transform: translateZ(0);
+ }
+
+ /* Hero Circular Ring Progress Styling */
+ .hero-ring-wrapper {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   position: relative;
+   margin: 8px 0 16px 0;
+ }
+
+ .ring-svg {
+   width: 170px;
+   height: 170px;
+   transform: rotate(-90deg);
+ }
+
+ .ring-bg {
+   fill: none;
+   stroke: rgba(255, 255, 255, 0.06);
+   stroke-width: 10;
+ }
+
+ .ring-fill {
+   fill: none;
+   stroke: url(#ringGradient);
+   stroke-width: 10;
+   stroke-linecap: round;
+   stroke-dasharray: 326.72;
+   stroke-dashoffset: 326.72;
+   transition: stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+ }
+
+ .ring-center-content {
+   position: absolute;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   text-align: center;
+ }
+
+ .ring-cals-num {
+   font-size: 2.1rem;
+   font-weight: 900;
+   color: var(--text-main);
+   line-height: 1.1;
+   letter-spacing: -1px;
+ }
+
+ .ring-cals-sub {
+   font-size: 0.78rem;
+   color: var(--text-sub);
+   font-weight: 700;
+   margin-top: 2px;
+ }
+
+ .daily-summary h3 { font-size: 0.85rem; margin-bottom: 4px; color: var(--text-sub); font-weight: 700; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; }
+
+ /* Macro Pill Indicators */
+ .hero-macros-row {
+   display: grid;
+   grid-template-columns: repeat(3, 1fr);
+   gap: 8px;
+   width: 100%;
+   margin-top: 10px;
+ }
+
+ .macro-pill {
+   background: var(--bg-input);
+   border: 1px solid var(--glass-border);
+   padding: 8px 6px;
+   border-radius: 14px;
+   text-align: center;
+ }
+ .macro-pill .p-title { font-size: 0.7rem; color: var(--text-sub); font-weight: 700; }
+ .macro-pill .p-val { font-size: 0.95rem; font-weight: 800; margin-top: 2px; }
+ .macro-pill.p-prot .p-val { color: var(--accent-protein); }
+ .macro-pill.p-carb .p-val { color: var(--accent-carbs); }
+ .macro-pill.p-fat .p-val { color: var(--accent-fats); }
+
+ /* Action Buttons */
+ .voice-btn { 
+   width: 100%; 
+   padding: 13px; 
+   background: var(--btn-voice); 
+   color: white; 
+   border: none; 
+   border-radius: 16px; 
+   cursor: pointer; 
+   font-size: 0.88rem; 
+   font-weight: 800; 
+   margin-bottom: 12px; 
+   display: flex; 
+   align-items: center; 
+   justify-content: center; 
+   gap: 8px; 
+   box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25); 
+   transition: transform 0.15s ease;
+ }
+ .voice-btn:active { transform: scale(0.97); }
+ .voice-btn.recording { background: linear-gradient(135deg, #ef4444, #dc2626) !important; animation: pulse 1.5s infinite; }
+
+ @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.65; } 100% { opacity: 1; } }
+
+ /* ==================== DIRECT SCANNER INPUT WRAPPER ==================== */
+ .input-wrapper {
+   position: relative;
+   border-radius: 16px;
+   overflow: hidden;
+   margin-bottom: 12px;
+   border: 1px solid var(--glass-border);
+   transition: border-color 0.3s ease, box-shadow 0.3s ease;
+   transform: translateZ(0);
+ }
+
+ textarea { 
+   width: 100%; 
+   height: 90px; 
+   padding: 14px; 
+   border-radius: 16px; 
+   border: none !important; 
+   background: var(--bg-input); 
+   color: var(--text-main); 
+   font-size: 16px !important; 
+   resize: none; 
+   display: block;
+   margin-bottom: 0 !important;
+ }
+
+ .scan-beam {
+   position: absolute;
+   top: 0;
+   left: 0;
+   width: 100%;
+   height: 12px;
+   background: linear-gradient(180deg, transparent, rgba(16, 185, 129, 0.4), var(--accent-primary));
+   box-shadow: 0 3px 12px var(--accent-primary);
+   opacity: 0;
+   pointer-events: none;
+   transform: translateY(-100%);
+   will-change: transform;
+ }
+
+ .input-wrapper.scanning {
+   border-color: var(--accent-primary) !important;
+   box-shadow: 0 0 18px var(--accent-primary-glow);
+ }
+
+ .input-wrapper.scanning .scan-beam {
+   opacity: 1;
+   animation: scanAnimation 1.4s ease-in-out infinite alternate;
+ }
+
+ @keyframes scanAnimation {
+   0% { transform: translateY(-100%); }
+   100% { transform: translateY(900%); }
+ }
+
+ .btn-main.scanning-state {
+   background: linear-gradient(135deg, #059669, #047857) !important;
+   animation: pulseBtn 1.2s infinite alternate;
+   cursor: wait;
+ }
+
+ @keyframes pulseBtn {
+   0% { opacity: 0.85; }
+   100% { opacity: 1; }
+ }
+
+ .img-actions-wrapper { display: flex; gap: 8px; margin-bottom: 12px; }
+ .btn-action-img { 
+   width: 100%; 
+   padding: 11px; 
+   border-radius: 14px; 
+   color: white; 
+   font-size: 0.82rem; 
+   font-weight: 700; 
+   border: none; 
+   cursor: pointer; 
+   text-align: center; 
+   display: flex; 
+   align-items: center; 
+   justify-content: center; 
+   gap: 6px; 
+   background: var(--btn-img); 
+   box-shadow: 0 4px 14px rgba(16, 185, 129, 0.2);
+   transition: transform 0.15s ease;
+ }
+ .btn-action-img:active { transform: scale(0.97); }
+ .btn-action-gallery { background: var(--bg-input); border: 1px solid var(--glass-border); color: var(--text-main); box-shadow: none; }
+ input[type="file"] { display: none; }
+
+ #imagePreviewWrapper { position: relative; margin-bottom: 12px; display: none; }
+ #imagePreview { max-width: 100%; max-height: 220px; border-radius: 16px; width: 100%; object-fit: cover; border: 1px solid var(--glass-border); }
+ .btn-cancel-img { 
+   position: absolute; 
+   top: 10px; 
+   left: 10px; 
+   background: rgba(239, 68, 68, 0.95); 
+   color: white; 
+   border: none; 
+   border-radius: 50%; 
+   width: 28px; 
+   height: 28px; 
+   cursor: pointer; 
+   font-weight: bold; 
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+ }
+
+ .btn-main { 
+   width: 100%; 
+   padding: 14px; 
+   background: linear-gradient(135deg, #10b981, #059669); 
+   color: white; 
+   border: none; 
+   border-radius: 16px; 
+   font-weight: 800; 
+   font-size: 0.92rem; 
+   cursor: pointer; 
+   box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+   transition: transform 0.15s ease, opacity 0.15s ease;
+ }
+ .btn-main:active { transform: scale(0.97); opacity: 0.92; }
+
+ .btn-archive { 
+   background: var(--bg-input); 
+   color: var(--accent-protein); 
+   border: 1px solid var(--accent-protein); 
+   padding: 10px 14px; 
+   border-radius: 14px; 
+   font-size: 0.82rem; 
+   font-weight: 700; 
+   cursor: pointer; 
+   margin-top: 14px; 
+   width: 100%; 
+   text-align: center; 
+   transition: transform 0.15s ease, background-color 0.15s ease;
+ }
+ .btn-archive:active { transform: scale(0.97); background: rgba(59, 130, 246, 0.15); }
+
+ /* Modals */
+ .camera-modal { 
+   display: none; 
+   position: fixed; 
+   top: 0; 
+   left: 0; 
+   width: 100%; 
+   height: 100%; 
+   background: rgba(0,0,0,0.92); 
+   backdrop-filter: blur(8px);
+   z-index: 2000; 
+   flex-direction: column; 
+   justify-content: center; 
+   align-items: center; 
+   padding: 20px; 
+ }
+ .camera-modal.active { display: flex; }
+ .camera-video { width: 100%; max-width: 450px; height: 60vh; background: #000; border-radius: 20px; object-fit: cover; border: 2px solid var(--accent-primary); margin-bottom: 14px; }
+ .camera-controls { display: flex; gap: 10px; width: 100%; max-width: 450px; }
+
+ .day-modal { 
+   display: none; 
+   position: fixed; 
+   top: 0; 
+   left: 0; 
+   width: 100%; 
+   height: 100%; 
+   background: rgba(0,0,0,0.75); 
+   backdrop-filter: blur(6px);
+   z-index: 2050; 
+   justify-content: center; 
+   align-items: center; 
+   padding: 20px; 
+ }
+ .day-modal.active { display: flex; }
+
+ .day-modal-content { 
+   background: var(--bg-card); 
+   backdrop-filter: blur(24px);
+   -webkit-backdrop-filter: blur(24px);
+   width: 100%; 
+   max-width: 450px; 
+   max-height: 80vh; 
+   border-radius: var(--radius-card); 
+   border: 1px solid var(--glass-border); 
+   padding: 20px; 
+   overflow-y: auto; 
+   box-shadow: var(--shadow-card); 
+   position: relative; 
+   transform: translateZ(0);
+ }
+ .day-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; }
+ .day-modal-header h3 { font-size: 1rem; color: var(--accent-primary); font-weight: 800; }
+
+ #editMealModal { z-index: 2150 !important; }
+ #keyAuthModal, #keySettingsModal { z-index: 2200 !important; }
+
+ .meal-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 8px; color: var(--text-main); }
+
+ .macros-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; text-align: center; }
+ .macro-box { padding: 10px 6px; border-radius: 16px; background: var(--bg-input); border: 1px solid var(--glass-border); }
+ .macro-box .title { font-size: 0.72rem; color: var(--text-sub); font-weight: 700; }
+ .macro-box .value { font-size: 1.05rem; font-weight: 900; margin-top: 2px; }
+ .macro-box.protein .value { color: var(--accent-protein); }
+ .macro-box.carbs .value { color: var(--accent-carbs); }
+ .macro-box.fats .value { color: var(--accent-fats); }
+
+ .result-actions { display: flex; gap: 8px; align-items: center; margin-top: 12px; }
+ .btn-dismiss { 
+   background: rgba(239, 68, 68, 0.85); 
+   color: white; 
+   border: none; 
+   border-radius: 14px; 
+   font-weight: 700; 
+   font-size: 0.88rem; 
+   cursor: pointer; 
+   padding: 13px 16px; 
+   white-space: nowrap; 
+   box-shadow: 0 4px 14px rgba(239, 68, 68, 0.25); 
+   transition: transform 0.15s ease;
+ }
+ .btn-dismiss:active { transform: scale(0.97); }
+
+ /* History Cards */
+ .history-card h3 { font-size: 0.88rem; margin-bottom: 12px; color: var(--text-sub); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+
+ .history-item-wrapper { position: relative; overflow: hidden; border-radius: 16px; margin-bottom: 8px; }
+ .history-item-wrapper:last-child { margin-bottom: 0; }
+ 
+ .swipe-edit-bg { 
+   position: absolute; 
+   top: 0; 
+   left: 0; 
+   width: 100%; 
+   height: 100%; 
+   background: var(--accent-protein); 
+   color: white; 
+   display: flex; 
+   align-items: center; 
+   justify-content: flex-start; 
+   padding-left: 14px; 
+   z-index: 1; 
+   border-radius: 16px; 
+   opacity: 0;
+   transition: opacity 0.2s ease;
+ }
+ 
+ .swipe-edit-btn { background: #ffffff; color: var(--accent-protein); border: none; padding: 6px 14px; border-radius: 10px; font-weight: bold; font-size: 0.78rem; cursor: pointer; box-shadow: 0 3px 8px rgba(0,0,0,0.15); }
+ .history-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: var(--bg-input); border: 1px solid var(--glass-border); position: relative; z-index: 2; transition: transform 0.2s ease; border-radius: 16px; }
+ .history-info .name { font-weight: 800; font-size: 0.9rem; color: var(--text-main); }
+ .history-info .sub { font-size: 0.72rem; color: var(--text-sub); margin-top: 3px; font-weight: 600; }
+ .history-actions { display: flex; align-items: center; gap: 8px; }
+ .history-cals { font-weight: 900; color: var(--accent-primary); font-size: 0.92rem; }
+
+ .btn-delete-item { background: transparent; border: none; color: var(--accent-fats); cursor: pointer; font-size: 1rem; padding: 2px 6px; border-radius: 6px; transition: transform 0.15s ease; }
+ .btn-delete-item:active { transform: scale(1.2); }
+
+ .btn-mini-action { background: transparent; border: none; cursor: pointer; font-size: 0.88rem; padding: 2px 6px; border-radius: 6px; transition: transform 0.15s ease; }
+ .btn-mini-action:active { transform: scale(1.2); }
+
+ /* Undo Toast */
+ .undo-toast { 
+   position: fixed; 
+   bottom: 22px; 
+   left: 50%; 
+   transform: translate3d(-50%, 0, 0); 
+   background: var(--bg-card); 
+   backdrop-filter: blur(20px);
+   -webkit-backdrop-filter: blur(20px);
+   color: #ffffff; 
+   border: 1px solid var(--accent-primary-glow); 
+   padding: 8px 16px; 
+   border-radius: var(--radius-pill); 
+   font-size: 0.78rem; 
+   font-weight: 700; 
+   display: none; 
+   align-items: center; 
+   gap: 10px; 
+   box-shadow: 0 8px 28px rgba(0,0,0,0.5); 
+   z-index: 3000; 
+   touch-action: none;
+   user-select: none;
+   white-space: nowrap;
+   cursor: grab;
+   will-change: transform;
+ }
+ .undo-toast-btn { background: var(--accent-primary); color: white; border: none; padding: 4px 12px; border-radius: var(--radius-pill); cursor: pointer; font-size: 0.74rem; font-weight: 800; }
+ </style>
+</head>
+<body>
+
+<!-- SVG Gradient Definition -->
+<svg style="width:0;height:0;position:absolute;" aria-hidden="true" focusable="false">
+  <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#10b981" />
+    <stop offset="100%" stop-color="#3b82f6" />
+  </linearGradient>
+</svg>
+
+<!-- نافذة إدخال كلمة السر -->
+<div class="day-modal" id="keyAuthModal" onclick="closeModalOnOverlay(event, 'keyAuthModal')">
+ <div class="day-modal-content">
+ <div class="day-modal-header">
+ <h3>🔒 حماية المفتاح</h3>
+ <button class="close-sidebar-btn" onclick="closeKeyAuthModal()">✕</button>
+ </div>
+ <div style="display: flex; flex-direction: column; gap: 10px;">
+ <label style="font-size: 0.82rem; font-weight: bold; color: var(--text-sub);">أدخل كلمة السر للدخول للإعدادات:</label>
+ <input type="password" class="sidebar-input" id="authPasswordInput" placeholder="كلمة السر (الافتراضية: 1234)">
+ <button class="btn-main" onclick="verifyKeyPassword()">دخول 🔓</button>
+ </div>
+ </div>
+</div>
+
+<!-- نافذة تعديل المفتاح وكلمة السر -->
+<div class="day-modal" id="keySettingsModal" onclick="closeModalOnOverlay(event, 'keySettingsModal')">
+ <div class="day-modal-content">
+ <div class="day-modal-header">
+ <h3>🔑 إدارة المفتاح والأمان</h3>
+ <button class="close-sidebar-btn" onclick="closeKeySettingsModal()">✕</button>
+ </div>
+ <div style="display: flex; flex-direction: column; gap: 10px;">
+ <label style="font-size: 0.82rem; font-weight: bold; color: var(--text-sub);">تحديث مفتاح Gemini API:</label>
+ <input type="password" class="sidebar-input" id="modalApiKeyInput" placeholder="أدخل مفتاح API الجديد هنا">
+ <button class="btn-main" style="padding: 10px;" onclick="saveCustomApiKeyFromModal()">حفظ المفتاح ✅</button>
+
+ <hr style="border-color: var(--glass-border); margin: 4px 0;">
+
+ <label style="font-size: 0.82rem; font-weight: bold; color: var(--text-sub);">تغيير كلمة السر:</label>
+ <input type="password" class="sidebar-input" id="oldPassInput" placeholder="كلمة السر الحالية">
+ <input type="password" class="sidebar-input" id="newPassInput" placeholder="كلمة السر الجديدة">
+ <button class="sidebar-btn" style="color: var(--accent-carbs); border-color: var(--accent-carbs);" onclick="changeKeyPassword()">تغيير كلمة السر 🔐</button>
+ </div>
+ </div>
+</div>
+
+<!-- نافذة تعديل الوجبة المنبثقة -->
+<div class="day-modal" id="editMealModal" onclick="closeModalOnOverlay(event, 'editMealModal')">
+ <div class="day-modal-content">
+ <div class="day-modal-header">
+ <h3>✏️ تعديل الوجبة</h3>
+ <button class="close-sidebar-btn" onclick="closeEditMealModal()">✕</button>
+ </div>
+ <div style="display: flex; flex-direction: column; gap: 10px;">
+ <input type="hidden" id="editMealId">
+ <input type="hidden" id="editMealDateStr">
+ <label style="font-size: 0.82rem; font-weight: bold; color: var(--text-sub);">اسم الوجبة:</label>
+ <input type="text" class="sidebar-input" id="editMealName">
+ 
+ <label style="font-size: 0.82rem; font-weight: bold; color: var(--text-sub);">السعرات الحرارية:</label>
+ <input type="number" class="sidebar-input" id="editMealCals">
+
+ <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+ <div>
+ <label style="font-size: 0.72rem; color: var(--text-sub);">بروتين (g)</label>
+ <input type="number" class="sidebar-input" id="editMealProtein">
+ </div>
+ <div>
+ <label style="font-size: 0.72rem; color: var(--text-sub);">كارب (g)</label>
+ <input type="number" class="sidebar-input" id="editMealCarbs">
+ </div>
+ <div>
+ <label style="font-size: 0.72rem; color: var(--text-sub);">دهون (g)</label>
+ <input type="number" class="sidebar-input" id="editMealFats">
+ </div>
+ </div>
+
+ <button class="btn-main" style="margin-top: 8px;" onclick="saveEditedMeal()">حفظ التعديلات ✅</button>
+ </div>
+ </div>
+</div>
+
+<!-- كبسولة التراجع المصغرة والطافية -->
+<div class="undo-toast" id="undoToast">
+ <span id="undoToastText">تم النقل للمحذوفات 🗑️</span>
+ <button class="undo-toast-btn" onclick="undoLastDelete()">تراجع ↩️</button>
+</div>
+
+<!-- نافذة عرض تفاصيل اليوم المنبثقة -->
+<div class="day-modal" id="dayModal" onclick="closeModalOnOverlay(event, 'dayModal')">
+ <div class="day-modal-content">
+ <div class="day-modal-header">
+ <h3 id="dayModalTitle">تفاصيل اليوم</h3>
+ <button class="close-sidebar-btn" onclick="closeDayDetailModal()">✕</button>
+ </div>
+ <div id="dayModalBody"></div>
+ </div>
+</div>
+
+<!-- واجهة الكاميرا المباشرة -->
+<div class="camera-modal" id="cameraModal">
+ <video id="webcamVideo" class="camera-video" autoplay playsinline muted></video>
+ <div class="camera-controls">
+ <button class="btn-main" style="flex: 2;" onclick="takeCameraSnapshot()">📸 التقاط الصورة</button>
+ <button class="btn-dismiss" style="flex: 1;" onclick="closeLiveCamera()">✕ إلغاء</button>
+ </div>
+</div>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- القائمة الجانبية -->
+<div class="sidebar-menu" id="sidebarMenu">
+ <div class="sidebar-header">
+ <h2>⚙️ الإعدادات والسجل</h2>
+ <button class="close-sidebar-btn" onclick="closeSidebar()">✕</button>
+ </div>
+
+ <div class="sidebar-section">
+ <label>🎯 هدف السعرات اليومي:</label>
+ <input type="number" class="sidebar-input" id="goalInput" placeholder="2000">
+ <button class="btn-main" style="padding: 10px; font-size: 0.82rem;" onclick="updateCalorieGoal()">حفظ الهدف الجديد</button>
+ </div>
+
+ <hr style="border-color: var(--glass-border); margin: 12px 0;">
+
+ <div class="sidebar-section">
+ <button class="sidebar-btn" style="color: var(--accent-primary); border-color: var(--accent-primary);" onclick="openKeyAuthModal()">🔑 إعدادات المفتاح والأمان</button>
+ </div>
+
+ <hr style="border-color: var(--glass-border); margin: 12px 0;">
+
+ <div class="sidebar-section">
+ <label>🗓️ سجل الإنجاز السنوي (12 شهراً):</label>
+ 
+ <div class="month-nav">
+ <button class="month-nav-btn" onclick="prevMonth()">◄</button>
+ <span class="month-title" id="currentMonthLabel">أغسطس 2026</span>
+ <button class="month-nav-btn" onclick="nextMonth()">►</button>
+ </div>
+
+ <div class="monthly-grid-wrapper">
+ <div class="monthly-grid" id="monthlyGrid"></div>
+ </div>
+
+ <button class="sidebar-btn" style="margin-top: 10px; color: var(--accent-primary);" onclick="saveMonthlyReportAsImage()">📸 حفظ تقرير الشهر كصورة</button>
+ <button class="sidebar-btn" style="color: var(--accent-fats);" onclick="resetMonthlyLog()">🔄 تصفير السجل كاملاً</button>
+ </div>
+
+ <hr style="border-color: var(--glass-border); margin: 12px 0;">
+
+ <div class="sidebar-section">
+ <label>🗑️ سلة محذوفات اليوم:</label>
+ <div id="trashList" style="background: var(--bg-input); border-radius: 12px; padding: 10px; max-height: 180px; overflow-y: auto;"></div>
+ </div>
+
+ <hr style="border-color: var(--glass-border); margin: 12px 0;">
+
+ <div class="sidebar-section">
+ <label>💧 متابع شرب الماء اليومي:</label>
+ <div style="font-size: 1.1rem; font-weight: 800; text-align: center; margin-bottom: 6px; color: var(--accent-protein);">
+ <span id="waterCount">0</span> / 8 أكواب
+ </div>
+ <button class="sidebar-btn" onclick="addWaterCup()">💧 إضافة كوب ماء (+1)</button>
+ <button class="sidebar-btn" style="color: var(--accent-fats);" onclick="resetWaterCups()">🔄 تصفير عداد الماء</button>
+ </div>
+
+ <hr style="border-color: var(--glass-border); margin: 12px 0;">
+
+ <button class="sidebar-btn" style="color: var(--accent-fats); border-color: var(--accent-fats);" onclick="clearDailyHistory()">🗑️ مسح سجل وجبات اليوم بالكامل</button>
+</div>
+
+<div class="container">
+ <header>
+ <div class="header-left">
+ <button class="menu-toggle-btn" onclick="openSidebar()">☰</button>
+ <h1>المساعد الصحي <span>الذكي</span></h1>
+ </div>
+
+ <!-- ZER CAPSULE DAY/NIGHT TOGGLE -->
+ <button class="toggle-capsule" id="themeBtn" onclick="toggleTheme()" aria-label="Toggle Theme">
+    <svg class="bg-element" viewBox="0 0 68 34">
+        <!-- Day Clouds -->
+        <path class="cloud cloud-1" d="M19,15 C19,13.3 17.6,12 16,12 C15.4,12 14.8,12.2 14.4,12.5 C13.7,10.5 11.8,9 9.5,9 C6.5,9 4,11.5 4,14.5 C4,14.7 4,14.8 4,15 C2.3,15.3 1,16.8 1,18.5 C1,20.4 2.6,22 4.5,22 L18.5,22 C20.4,22 22,20.4 22,18.5 C22,16.8 20.7,15.3 19,15 Z"/>
+        <path class="cloud cloud-2" d="M19,15 C19,13.3 17.6,12 16,12 C15.4,12 14.8,12.2 14.4,12.5 C13.7,10.5 11.8,9 9.5,9 C6.5,9 4,11.5 4,14.5 C4,14.7 4,14.8 4,15 C2.3,15.3 1,16.8 1,18.5 C1,20.4 2.6,22 4.5,22 L18.5,22 C20.4,22 22,20.4 22,18.5 C22,16.8 20.7,15.3 19,15 Z"/>
+        <!-- Night Stars -->
+        <path class="star star-1" d="M10,0 L13,7 L20,10 L13,13 L10,20 L7,13 L0,10 L7,7 Z"/>
+        <path class="star star-2" d="M10,0 L13,7 L20,10 L13,13 L10,20 L7,13 L0,10 L7,7 Z"/>
+        <path class="star star-3" d="M10,0 L13,7 L20,10 L13,13 L10,20 L7,13 L0,10 L7,7 Z"/>
+    </svg>
+    <div class="knob">
+        <!-- Sun Rays -->
+        <svg class="sun-rays" viewBox="0 0 25 25">
+            <line x1="12.5" y1="2" x2="12.5" y2="4.5"/>
+            <line x1="12.5" y1="20.5" x2="12.5" y2="23"/>
+            <line x1="2" y1="12.5" x2="4.5" y2="12.5"/>
+            <line x1="20.5" y1="12.5" x2="23" y2="12.5"/>
+            <line x1="5" y1="5" x2="6.8" y2="6.8"/>
+            <line x1="18.2" y1="18.2" x2="20" y2="20"/>
+            <line x1="5" y1="20" x2="6.8" y2="18.2"/>
+            <line x1="18.2" y1="6.8" x2="20" y2="5"/>
+        </svg>
+        <!-- Moon Craters -->
+        <svg class="moon-craters" viewBox="0 0 25 25">
+            <circle class="crater" cx="9" cy="9.5" r="2.2"/>
+            <circle class="crater" cx="15.5" cy="14" r="1.8"/>
+            <circle class="crater" cx="10" cy="17" r="1.3"/>
+        </svg>
+    </div>
+ </button>
+ </header>
+
+ <!-- Hero Summary Card with SVG Progress Ring -->
+ <div class="daily-summary">
+ <h3>مجموع الاستهلاك اليومي</h3>
+ 
+ <div class="hero-ring-wrapper">
+   <svg class="ring-svg" viewBox="0 0 120 120">
+     <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
+     <circle class="ring-fill" id="calRingFill" cx="60" cy="60" r="52"></circle>
+   </svg>
+   <div class="ring-center-content">
+     <div class="ring-cals-num" id="dailyCals">0</div>
+     <div class="ring-cals-sub">/ <span id="targetCalsDisplay">2000</span> سعرة</div>
+   </div>
+ </div>
+
+ <!-- Daily Macro Totals -->
+ <div class="hero-macros-row">
+   <div class="macro-pill p-prot">
+     <div class="p-title">بروتين</div>
+     <div class="p-val" id="heroTotalProtein">0g</div>
+   </div>
+   <div class="macro-pill p-carb">
+     <div class="p-title">كارب</div>
+     <div class="p-val" id="heroTotalCarbs">0g</div>
+   </div>
+   <div class="macro-pill p-fat">
+     <div class="p-title">دهون</div>
+     <div class="p-val" id="heroTotalFats">0g</div>
+   </div>
+ </div>
+
+ <button class="btn-archive" onclick="archiveCurrentDay()">📥 إغلاق وترحيل اليوم للسجل الشهري</button>
+ </div>
+
+ <div class="input-card">
+ <button class="voice-btn" id="micBtn" onclick="toggleVoiceInput()">
+ <span id="micBtnText">🎤 إملي الوجبة بالصوت</span>
+ </button>
+
+ <!-- حاوية المسح الضوئي المباشر لحقل الإدخال -->
+ <div class="input-wrapper" id="inputWrapper">
+   <textarea id="mealInput" placeholder="اكتب وجبتك أو امليها بالصوت.. (مثال: صحن رز 200g مع صدر دجاج وجناح و5 بيضات)"></textarea>
+   <div class="scan-beam"></div>
+ </div>
+ 
+ <div class="img-actions-wrapper">
+ <button type="button" class="btn-action-img" style="flex: 1;" onclick="openLiveCamera()">
+ 📷 كاميرا مباشرة
+ </button>
+
+ <label for="galleryFileInput" class="btn-action-img btn-action-gallery" style="flex: 1;">
+ 🖼️ من الاستديو
+ </label>
+ <input type="file" id="galleryFileInput" accept="image/*" onchange="previewSelectedImage(event)">
+ </div>
+
+ <div id="imagePreviewWrapper">
+ <button class="btn-cancel-img" onclick="clearSelectedImage()">✕</button>
+ <img id="imagePreview" alt="معاينة الصورة">
+ </div>
+
+ <button class="btn-main" id="analyzeBtn" onclick="analyzeMeal()">تحليل الوجبة وإضافتها بالمحرك الموسوعي</button>
+ </div>
+
+ <!-- كرت نتائج التحليل الموسوعي المطور -->
+ <div class="result-card" id="resultCard">
+   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+     <div class="meal-title" id="resMealName" style="margin-bottom:0; font-weight: 800; font-size: 1.05rem;">اسم الوجبة</div>
+     <span id="resHealthScore" style="background: var(--accent-primary); color: white; padding: 2px 10px; border-radius: 12px; font-weight: bold; font-size: 0.75rem;">10/10</span>
+   </div>
+
+   <div style="color: var(--accent-primary); font-weight: 900; font-size: 1.35rem; margin-bottom: 12px;" id="resCals">0 سعرة حرارية</div>
+   
+   <!-- الماكروز الرئيسية -->
+   <div class="macros-grid">
+     <div class="macro-box protein">
+       <div class="title">بروتين</div>
+       <div class="value" id="resProtein">0g</div>
+     </div>
+     <div class="macro-box carbs">
+       <div class="title">كارب صافي</div>
+       <div class="value" id="resNetCarbs">0g</div>
+     </div>
+     <div class="macro-box fats">
+       <div class="title">دهون</div>
+       <div class="value" id="resFats">0g</div>
+     </div>
+   </div>
+
+   <!-- التفاصيل الميكرو المتقدمة -->
+   <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-bottom: 10px; text-align: center; font-size: 0.72rem; background: var(--bg-input); padding: 8px; border-radius: 12px; border: 1px solid var(--glass-border);">
+     <div>ألياف: <b id="resFiber" style="color: var(--accent-primary);">0g</b></div>
+     <div>سكر: <b id="resSugar" style="color: var(--accent-carbs);">0g</b></div>
+     <div>صوديوم: <b id="resSodium" style="color: var(--text-sub);">0mg</b></div>
+   </div>
+
+   <!-- تفكيك المكونات والأوزان -->
+   <div style="background: var(--bg-input); padding: 12px; border-radius: 12px; margin-bottom: 8px; font-size: 0.8rem; text-align: right; border: 1px solid var(--glass-border);">
+     <strong style="color: var(--accent-primary); display: block; margin-bottom: 4px;">🔍 تفكيك المكونات والأوزان:</strong>
+     <span id="resBreakdown" style="line-height: 1.4; color: var(--text-main);">-</span>
+   </div>
+
+   <!-- تقديرات الطهي والزيوت -->
+   <div style="background: rgba(245, 158, 11, 0.08); border: 1px dashed var(--accent-carbs); padding: 10px; border-radius: 12px; margin-bottom: 12px; font-size: 0.76rem; text-align: right;">
+     <strong style="color: var(--accent-carbs);">🍳 تقديرات الطهي والزيوت:</strong> <span id="resAssumptions" style="color: var(--text-main);">-</span>
+   </div>
+   
+   <p id="resNotes" style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 12px; text-align: right;"></p>
+   
+   <div class="result-actions">
+     <button class="btn-main" style="flex: 1;" onclick="saveMealToDailyHistory()">✅ اعتماد وإضافة للسجل اليومي</button>
+     <button class="btn-dismiss" onclick="dismissCurrentAnalysis()">🗑️ إلغاء</button>
+   </div>
+ </div>
+
+ <div class="history-card">
+ <h3>سجل وجبات اليوم</h3>
+ <div id="historyList"></div>
+ </div>
+</div>
+
+<script>
+ // ==================== 1. ثوابت التطبيق العالمية ====================
+ const CONFIG = {
+   DEFAULT_GOAL: 2000,
+   DEFAULT_PASS: "1234",
+   TOAST_TIMEOUT: 5000,
+   MAX_WATER_CUPS: 8,
+   MODELS: [
+     "gemini-3.1-flash-lite",
+     "gemini-2.0-flash",
+     "gemini-1.5-flash"
+   ]
+ };
+
+ let currentAnalyzedMeal = null;
+ let base64ImageData = null;
+ let imageMimeType = "";
+ let mediaStreamInstance = null;
+ 
+ let recognition = null;
+ let isListening = false;
+
+ let viewYear = new Date().getFullYear();
+ let viewMonth = new Date().getMonth();
+ const arabicMonths = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+
+ let undoTimer = null;
+ let lastDeletedMealId = null;
+ let isAnimatingMonth = false;
+
+ // ==================== 2. دوال مساعدة أمنية ودفاعية ====================
+ function safeJSONParse(key, fallbackValue = []) {
+   try {
+     const item = localStorage.getItem(key);
+     return item ? JSON.parse(item) : fallbackValue;
+   } catch (e) {
+     console.error(`[Storage Safe Guard] خطأ في قراءة المفتاح ${key}:`, e);
+     return fallbackValue;
+   }
+ }
+
+ function toEnglishDigits(str) {
+   if (str === null || str === undefined) return '';
+   return String(str).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+ }
+
+ function escapeHTML(str) {
+   if (!str) return '';
+   return String(str)
+     .replace(/&/g, "&amp;")
+     .replace(/</g, "&lt;")
+     .replace(/>/g, "&gt;")
+     .replace(/"/g, "&quot;")
+     .replace(/'/g, "&#039;");
+ }
+
+ // ==================== 3. نظام حماية المفتاح والأمان ====================
+ function getStoredPassword() {
+   return localStorage.getItem('health_app_password') || CONFIG.DEFAULT_PASS;
+ }
+
+ function openKeyAuthModal() {
+   document.getElementById('authPasswordInput').value = "";
+   document.getElementById('keyAuthModal').classList.add('active');
+   setModalScrollLock(true);
+ }
+
+ function closeKeyAuthModal() {
+   document.getElementById('keyAuthModal').classList.remove('active');
+   setModalScrollLock(false);
+ }
+
+ function verifyKeyPassword() {
+   const entered = toEnglishDigits(document.getElementById('authPasswordInput').value.trim());
+   const actual = getStoredPassword();
+
+   if (entered === actual) {
+     closeKeyAuthModal();
+     openKeySettingsModal();
+   } else {
+     alert("❌ كلمة السر غير صحيحة!");
+   }
+ }
+
+ function openKeySettingsModal() {
+   document.getElementById('modalApiKeyInput').value = localStorage.getItem('health_custom_api_key') || "";
+   document.getElementById('oldPassInput').value = "";
+   document.getElementById('newPassInput').value = "";
+   document.getElementById('keySettingsModal').classList.add('active');
+   setModalScrollLock(true);
+ }
+
+ function closeKeySettingsModal() {
+   document.getElementById('keySettingsModal').classList.remove('active');
+   setModalScrollLock(false);
+ }
+
+ function saveCustomApiKeyFromModal() {
+   const val = document.getElementById('modalApiKeyInput').value.trim();
+   if (val) {
+     localStorage.setItem('health_custom_api_key', val);
+     alert("✅ تم حفظ مفتاح API الجديد بنجاح!");
+   } else {
+     localStorage.removeItem('health_custom_api_key');
+     alert("🔄 تم مسح المفتاح المخصص.");
+   }
+   closeKeySettingsModal();
+   closeSidebar();
+ }
+
+ function changeKeyPassword() {
+   const oldPass = toEnglishDigits(document.getElementById('oldPassInput').value.trim());
+   const newPass = toEnglishDigits(document.getElementById('newPassInput').value.trim());
+   const currentPass = getStoredPassword();
+
+   if (oldPass !== currentPass) {
+     alert("❌ كلمة السر الحالية غير صحيحة!");
+     return;
+   }
+
+   if (!newPass || newPass.length < 4) {
+     alert("يرجى إدخال كلمة سر جديدة لا تقل عن 4 رموز.");
+     return;
+   }
+
+   localStorage.setItem('health_app_password', newPass);
+   alert("✅ تم تغيير كلمة السر بنجاح!");
+   document.getElementById('oldPassInput').value = "";
+   document.getElementById('newPassInput').value = "";
+ }
+
+ function getLocalDateStr(dateObj = new Date()) {
+   const year = dateObj.getFullYear();
+   const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+   const day = String(dateObj.getDate()).padStart(2, '0');
+   return `${year}-${month}-${day}`;
+ }
+
+ function getActiveApiKey() {
+   return localStorage.getItem('health_custom_api_key') || "";
+ }
+
+ function setModalScrollLock(isLocked) {
+   if (isLocked) {
+     document.body.classList.add('modal-open');
+   } else {
+     const activeModals = document.querySelectorAll('.day-modal.active, .camera-modal.active');
+     if (activeModals.length === 0) {
+       document.body.classList.remove('modal-open');
+     }
+   }
+ }
+
+ function closeModalOnOverlay(event, modalId) {
+   if (event.target.id === modalId) {
+     const modal = document.getElementById(modalId);
+     if (modal) {
+       modal.classList.remove('active');
+       setModalScrollLock(false);
+     }
+   }
+ }
+
+ // ==================== 4. الإيماءات اللمسية المحسنة بدون تعليق الكيبورد ====================
+ let touchStartX = 0;
+ let touchStartY = 0;
+
+ document.addEventListener('touchstart', function(e) {
+   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+   touchStartX = e.changedTouches[0].screenX;
+   touchStartY = e.changedTouches[0].screenY;
+ }, { passive: true });
+
+ document.addEventListener('touchend', function(e) {
+   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+   let touchEndX = e.changedTouches[0].screenX;
+   let touchEndY = e.changedTouches[0].screenY;
+   let diffX = touchEndX - touchStartX;
+   let diffY = touchEndY - touchStartY;
+
+   if (Math.abs(diffX) > Math.abs(diffY)) {
+     if (diffX < -60 && touchStartX > window.innerWidth - 50) {
+       openSidebar();
+     } else if (diffX > 60 && document.getElementById('sidebarMenu').classList.contains('open')) {
+       closeSidebar();
+     }
+   }
+ }, { passive: true });
+
+ let cameraTouchStartY = 0;
+ const cameraModal = document.getElementById('cameraModal');
+
+ cameraModal.addEventListener('touchstart', function(e) {
+   cameraTouchStartY = e.touches[0].clientY;
+ }, { passive: true });
+
+ cameraModal.addEventListener('touchend', function(e) {
+   let cameraTouchEndY = e.changedTouches[0].clientY;
+   if (cameraTouchEndY - cameraTouchStartY > 80) {
+     closeLiveCamera();
+   }
+ }, { passive: true });
+
+ function initGridSwipe() {
+   const grid = document.getElementById('monthlyGrid');
+   if (!grid) return;
+
+   let gridTouchStartX = 0;
+
+   grid.addEventListener('touchstart', function(e) {
+     e.stopPropagation();
+     gridTouchStartX = e.touches[0].clientX;
+   }, { passive: true });
+
+   grid.addEventListener('touchend', function(e) {
+     e.stopPropagation();
+     let gridTouchEndX = e.changedTouches[0].clientX;
+     let diffX = gridTouchEndX - gridTouchStartX;
+     if (Math.abs(diffX) > 40) {
+       if (diffX > 0) {
+         prevMonth();
+       } else {
+         nextMonth();
+       }
+     }
+   }, { passive: true });
+ }
+
+ function initToastSwipe() {
+   const toast = document.getElementById('undoToast');
+   if (!toast) return;
+
+   let startY = 0;
+   let currentY = 0;
+
+   toast.addEventListener('touchstart', function(e) {
+     startY = e.touches[0].clientY;
+     toast.style.transition = 'none';
+   }, { passive: true });
+
+   toast.addEventListener('touchmove', function(e) {
+     currentY = e.touches[0].clientY;
+     let diffY = currentY - startY;
+     if (diffY > 0) {
+       toast.style.transform = `translate3d(-50%, ${diffY}px, 0)`;
+       toast.style.opacity = Math.max(0, 1 - diffY / 80);
+     }
+   }, { passive: true });
+
+   toast.addEventListener('touchend', function(e) {
+     let diffY = currentY - startY;
+     toast.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+     if (diffY > 30) {
+       toast.style.transform = 'translate3d(-50%, 60px, 0)';
+       toast.style.opacity = '0';
+       setTimeout(() => {
+         toast.style.display = 'none';
+         toast.style.transform = 'translate3d(-50%, 0, 0)';
+         toast.style.opacity = '1';
+         lastDeletedMealId = null;
+       }, 200);
+     } else {
+       toast.style.transform = 'translate3d(-50%, 0, 0)';
+       toast.style.opacity = '1';
+     }
+     startY = 0;
+     currentY = 0;
+   }, { passive: true });
+ }
+
+ // ==================== 5. الأرشفة والترحيل ====================
+ function checkAndAutoArchivePastDays() {
+   try {
+     const todayStr = getLocalDateStr();
+     let monthlyLog = getMonthlyLog();
+     let archivedAny = false;
+
+     const pastKeys = [];
+     for (let i = 0; i < localStorage.length; i++) {
+       const key = localStorage.key(i);
+       if (key && key.startsWith('health_meals_')) {
+         const dateStr = key.replace('health_meals_', '');
+         if (dateStr < todayStr) {
+           pastKeys.push({ key, dateStr });
+         }
+       }
+     }
+
+     pastKeys.sort((a, b) => a.dateStr.localeCompare(b.dateStr));
+
+     pastKeys.forEach(item => {
+       const newMeals = safeJSONParse(item.key, []);
+       if (newMeals.length > 0) {
+         const goal = getStoredCalorieGoal();
+         const existingIndex = monthlyLog.findIndex(d => d.date === item.dateStr);
+
+         if (existingIndex !== -1) {
+           monthlyLog[existingIndex].meals = [...(monthlyLog[existingIndex].meals || []), ...newMeals];
+           let mergedCals = 0;
+           monthlyLog[existingIndex].meals.forEach(m => mergedCals += (Number(m.cals) || 0));
+           monthlyLog[existingIndex].calories = mergedCals;
+           monthlyLog[existingIndex].status = mergedCals <= goal ? 'green' : 'red';
+         } else {
+           let totalCals = 0;
+           newMeals.forEach(m => totalCals += (Number(m.cals) || 0));
+           const dayNumber = monthlyLog.length + 1;
+           monthlyLog.push({
+             day: dayNumber,
+             date: item.dateStr,
+             calories: totalCals,
+             goal: goal,
+             status: totalCals <= goal ? 'green' : 'red',
+             meals: newMeals
+           });
+         }
+         archivedAny = true;
+       }
+       localStorage.removeItem(item.key);
+     });
+
+     if (archivedAny) {
+       localStorage.setItem('health_monthly_log', JSON.stringify(monthlyLog));
+     }
+   } catch (e) {
+     console.warn("خطأ في الترحيل التلقائي:", e);
+   }
+ }
+
+ function cleanOldLocalStorageData() {
+   try {
+     const now = new Date();
+     const keysToRemove = [];
+     for (let i = 0; i < localStorage.length; i++) {
+       const key = localStorage.key(i);
+       if (key && key.startsWith('health_meals_')) {
+         const dateStr = key.replace('health_meals_', '');
+         const fileDate = new Date(dateStr);
+         if (!isNaN(fileDate.getTime())) {
+           const diffTime = now.getTime() - fileDate.getTime();
+           const diffDays = diffTime / (1000 * 3600 * 24);
+           if (diffDays > 365) {
+             keysToRemove.push(key);
+           }
+         }
+       }
+     }
+     keysToRemove.forEach(k => localStorage.removeItem(k));
+   } catch (e) {
+     console.warn("خطأ في تنظيف التخزين المحلي:", e);
+   }
+ }
+
+ function animateMonthChange(direction) {
+   if (isAnimatingMonth) return;
+   isAnimatingMonth = true;
+
+   const grid = document.getElementById('monthlyGrid');
+   const outClass = direction === 'next' ? 'slide-out-left' : 'slide-out-right';
+   const inClass = direction === 'next' ? 'slide-in-right' : 'slide-in-left';
+
+   grid.classList.add(outClass);
+
+   setTimeout(() => {
+     if (direction === 'next') {
+       viewMonth++;
+       if (viewMonth > 11) {
+         viewMonth = 0;
+         viewYear++;
+       }
+     } else {
+       viewMonth--;
+       if (viewMonth < 0) {
+         viewMonth = 11;
+         viewYear--;
+       }
+     }
+
+     renderMonthlyGridContent();
+
+     grid.classList.remove(outClass);
+     grid.classList.add(inClass);
+
+     void grid.offsetWidth;
+
+     grid.classList.remove(inClass);
+     setTimeout(() => {
+       isAnimatingMonth = false;
+     }, 220);
+   }, 220);
+ }
+
+ function prevMonth() { animateMonthChange('prev'); }
+ function nextMonth() { animateMonthChange('next'); }
+
+ function renderMonthlyGridContent() {
+   const grid = document.getElementById('monthlyGrid');
+   const label = document.getElementById('currentMonthLabel');
+   if (!grid || !label) return;
+
+   label.innerText = `${arabicMonths[viewMonth]} ${toEnglishDigits(viewYear)}`;
+   grid.innerHTML = "";
+
+   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+   const monthlyLog = getMonthlyLog();
+
+   for (let i = 1; i <= daysInMonth; i++) {
+     const monthStr = String(viewMonth + 1).padStart(2, '0');
+     const dayStr = String(i).padStart(2, '0');
+     const targetDateStr = `${viewYear}-${monthStr}-${dayStr}`;
+
+     const dayData = monthlyLog.find(d => d.date === targetDateStr);
+
+     const box = document.createElement('div');
+     box.style.cursor = 'pointer';
+
+     if (dayData) {
+       box.className = `day-box ${dayData.status}`;
+       box.innerHTML = `<span class="day-num">يوم ${toEnglishDigits(i)}</span>${toEnglishDigits(dayData.calories)}`;
+       box.onclick = function() { openDayDetailModal(dayData, i, targetDateStr); };
+     } else {
+       box.className = `day-box empty`;
+       box.innerHTML = `<span class="day-num">يوم ${toEnglishDigits(i)}</span>-`;
+       box.onclick = function() { openDayDetailModal(null, i, targetDateStr); };
+     }
+     grid.appendChild(box);
+   }
+ }
+
+ function renderMonthlyGrid() { renderMonthlyGridContent(); }
+
+ function openDayDetailModal(dayData, dayNum, dateStr) {
+   const modal = document.getElementById('dayModal');
+   const title = document.getElementById('dayModalTitle');
+   const body = document.getElementById('dayModalBody');
+
+   if (!modal || !title || !body) return;
+
+   title.innerText = `تفاصيل يوم ${toEnglishDigits(dayNum)} (${toEnglishDigits(dateStr)})`;
+
+   if (!dayData || !dayData.meals || dayData.meals.length === 0) {
+     body.innerHTML = `<p style="text-align: center; color: var(--text-sub); padding: 25px 0;">لا توجد وجبات مسجلة لهذا اليوم.</p>`;
+   } else {
+     let mealsHtml = dayData.meals.map(m => `
+       <div class="history-item" style="border-bottom: 1px solid var(--glass-border); margin-bottom: 6px; padding: 10px 12px;">
+         <div class="history-info">
+           <div class="name">${escapeHTML(m.name)}</div>
+           <div class="sub">⏱️ ${toEnglishDigits(escapeHTML(m.time || ''))} | بروتين: ${toEnglishDigits(m.protein || 0)}g | كارب: ${toEnglishDigits(m.carbs || 0)}g | دهون: ${toEnglishDigits(m.fats || 0)}g</div>
+         </div>
+         <div class="history-actions">
+           <div class="history-cals">${toEnglishDigits(m.cals)} سعرة</div>
+           <button class="btn-mini-action" style="color: var(--accent-protein);" onclick="openEditArchiveMeal('${dateStr}', ${m.id})" title="تعديل">✏️</button>
+           <button class="btn-mini-action" style="color: var(--accent-fats);" onclick="deleteArchiveMeal('${dateStr}', ${m.id})" title="حذف">🗑️</button>
+         </div>
+       </div>
+     `).join('');
+
+     const statusText = dayData.status === 'green' ? '✅ ضمن الهدف اليومي' : '⚠️ تجاوز الهدف اليومي';
+     const statusColor = dayData.status === 'green' ? 'var(--accent-primary)' : 'var(--accent-fats)';
+
+     body.innerHTML = `
+       <div style="background: var(--bg-input); padding: 12px; border-radius: 12px; margin-bottom: 15px; text-align: center; border: 1px solid var(--glass-border);">
+         <div style="font-size: 1.3rem; font-weight: bold; color: ${statusColor};">${toEnglishDigits(dayData.calories)} / ${toEnglishDigits(dayData.goal || CONFIG.DEFAULT_GOAL)} سعرة</div>
+         <div style="font-size: 0.85rem; color: var(--text-sub); margin-top: 4px;">الحالة: ${statusText}</div>
+       </div>
+       <h4 style="font-size: 0.95rem; color: var(--text-sub); margin-bottom: 10px;">📋 قائمة وجبات اليوم:</h4>
+       <div style="max-height: 250px; overflow-y: auto;">
+         ${mealsHtml}
+       </div>
+     `;
+   }
+
+   modal.classList.add('active');
+   setModalScrollLock(true);
+ }
+
+ function closeDayDetailModal() {
+   const modal = document.getElementById('dayModal');
+   if (modal) {
+     modal.classList.remove('active');
+     setModalScrollLock(false);
+   }
+ }
+
+ function deleteArchiveMeal(dateStr, mealId) {
+   if (!confirm("هل أنت تأكد من حذف هذه الوجبة من الأرشيف؟")) return;
+
+   let monthlyLog = getMonthlyLog();
+   const dayIndex = monthlyLog.findIndex(d => d.date === dateStr);
+
+   if (dayIndex !== -1) {
+     monthlyLog[dayIndex].meals = monthlyLog[dayIndex].meals.filter(m => m.id !== mealId);
+     
+     let newTotalCals = 0;
+     monthlyLog[dayIndex].meals.forEach(m => newTotalCals += (Number(m.cals) || 0));
+     
+     monthlyLog[dayIndex].calories = newTotalCals;
+     monthlyLog[dayIndex].status = newTotalCals <= (monthlyLog[dayIndex].goal || CONFIG.DEFAULT_GOAL) ? 'green' : 'red';
+
+     localStorage.setItem('health_monthly_log', JSON.stringify(monthlyLog));
+     
+     const dayNum = new Date(dateStr).getDate();
+     openDayDetailModal(monthlyLog[dayIndex], dayNum, dateStr);
+     renderMonthlyGrid();
+   }
+ }
+
+ function openEditArchiveMeal(dateStr, mealId) {
+   const monthlyLog = getMonthlyLog();
+   const dayData = monthlyLog.find(d => d.date === dateStr);
+   if (!dayData) return;
+
+   const meal = dayData.meals.find(m => m.id === mealId);
+   if (!meal) return;
+
+   openEditMealModal(meal, dateStr);
+ }
+
+ // ==================== 6. الكاميرا المباشرة ====================
+ async function openLiveCamera() {
+   const modal = document.getElementById('cameraModal');
+   const video = document.getElementById('webcamVideo');
+
+   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+     alert("الكاميرا المباشرة غير مدعومة في المتصفح الحالي، يمكنك استخدام زر الاستديو.");
+     return;
+   }
+
+   try {
+     mediaStreamInstance = await navigator.mediaDevices.getUserMedia({
+       video: { facingMode: { ideal: "environment" } }
+     });
+     video.srcObject = mediaStreamInstance;
+     modal.classList.add('active');
+     setModalScrollLock(true);
+   } catch (err) {
+     closeLiveCamera();
+   }
+ }
+
+ function takeCameraSnapshot() {
+   const video = document.getElementById('webcamVideo');
+   if (!video || !mediaStreamInstance) return;
+
+   const canvas = document.createElement('canvas');
+   canvas.width = video.videoWidth || 1280;
+   canvas.height = video.videoHeight || 720;
+
+   const ctx = canvas.getContext('2d');
+   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+   const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.90);
+   document.getElementById('imagePreview').src = compressedDataUrl;
+   document.getElementById('imagePreviewWrapper').style.display = 'block';
+   base64ImageData = compressedDataUrl.split(',')[1];
+   imageMimeType = 'image/jpeg';
+
+   closeLiveCamera();
+ }
+
+ function closeLiveCamera() {
+   const modal = document.getElementById('cameraModal');
+   const video = document.getElementById('webcamVideo');
+
+   if (mediaStreamInstance) {
+     mediaStreamInstance.getTracks().forEach(track => track.stop());
+     mediaStreamInstance = null;
+   }
+   if (video) video.srcObject = null;
+   modal.classList.remove('active');
+   setModalScrollLock(false);
+ }
+
+ function openSidebar() {
+   document.getElementById('sidebarMenu').classList.add('open');
+   document.getElementById('sidebarOverlay').style.display = 'block';
+   renderTrashList();
+   setModalScrollLock(true);
+ }
+
+ function closeSidebar() {
+   document.getElementById('sidebarMenu').classList.remove('open');
+   document.getElementById('sidebarOverlay').style.display = 'none';
+   setModalScrollLock(false);
+ }
+
+ function getStoredCalorieGoal() {
+   return Number(localStorage.getItem('health_app_goal')) || CONFIG.DEFAULT_GOAL;
+ }
+
+ function updateCalorieGoal() {
+   const goalInput = toEnglishDigits(document.getElementById('goalInput').value);
+   const newGoal = Number(goalInput);
+
+   if (!newGoal || newGoal < 500 || newGoal > 10000) {
+     alert("يرجى إدخال هدف سعرات منطقي (بين 500 و 10000 سعرة).");
+     return;
+   }
+
+   localStorage.setItem('health_app_goal', newGoal);
+   alert("✅ تم تحديث الهدف اليومي إلى: " + newGoal + " سعرة!");
+   closeSidebar();
+   renderDailySummaryAndHistory();
+ }
+
+ function getMonthlyLog() {
+   return safeJSONParse('health_monthly_log', []);
+ }
+
+ function archiveCurrentDay() {
+   const key = getTodayKey();
+   const newMeals = safeJSONParse(key, []);
+
+   if (newMeals.length === 0) {
+     alert("لا توجد وجبات جديدة مسجلة اليوم لترحيلها!");
+     return;
+   }
+
+   let monthlyLog = getMonthlyLog();
+   const goal = getStoredCalorieGoal();
+   const todayStr = getLocalDateStr();
+
+   const existingIndex = monthlyLog.findIndex(d => d.date === todayStr);
+
+   if (existingIndex !== -1) {
+     monthlyLog[existingIndex].meals = [...(monthlyLog[existingIndex].meals || []), ...newMeals];
+     let mergedCals = 0;
+     monthlyLog[existingIndex].meals.forEach(m => mergedCals += Number(m.cals) || 0);
+     monthlyLog[existingIndex].calories = mergedCals;
+     monthlyLog[existingIndex].status = mergedCals <= goal ? 'green' : 'red';
+   } else {
+     let totalCals = 0;
+     newMeals.forEach(m => totalCals += m.cals);
+     const dayNumber = monthlyLog.length + 1;
+
+     monthlyLog.push({
+       day: dayNumber,
+       date: todayStr,
+       calories: totalCals,
+       goal: goal,
+       status: totalCals <= goal ? 'green' : 'red',
+       meals: newMeals
+     });
+   }
+
+   localStorage.setItem('health_monthly_log', JSON.stringify(monthlyLog));
+   localStorage.removeItem(key);
+
+   alert(`✅ تم ترحيل ودمج الوجبات بنجاح في السجل الشهري!`);
+   renderDailySummaryAndHistory();
+   renderMonthlyGrid();
+ }
+
+ function resetMonthlyLog() {
+   if (confirm("هل أنت تأكد من مسح تقويم السجل كاملاً؟")) {
+     localStorage.removeItem('health_monthly_log');
+     renderMonthlyGrid();
+   }
+ }
+
+ function drawRoundedBox(ctx, x, y, width, height, radius) {
+   ctx.beginPath();
+   ctx.moveTo(x + radius, y);
+   ctx.lineTo(x + width - radius, y);
+   ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+   ctx.lineTo(x + width, y + height - radius);
+   ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+   ctx.lineTo(x + radius, y);
+   ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+   ctx.lineTo(x, y + radius);
+   ctx.quadraticCurveTo(x, y, x + radius, y);
+   ctx.closePath();
+   ctx.fill();
+ }
+
+ function saveMonthlyReportAsImage() {
+   const monthlyLog = getMonthlyLog();
+   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+   
+   const cols = 5;
+   const boxWidth = 120;
+   const boxHeight = 70;
+   const startX = 70;
+   const startY = 150;
+   const gap = 20;
+   const rows = Math.ceil(daysInMonth / cols);
+
+   const canvas = document.createElement('canvas');
+   canvas.width = 800;
+   canvas.height = Math.max(600, 180 + rows * (boxHeight + gap));
+   const ctx = canvas.getContext('2d');
+
+   ctx.fillStyle = "#080c14";
+   ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+   ctx.fillStyle = "#10b981";
+   ctx.font = "bold 28px system-ui, sans-serif";
+   ctx.textAlign = "center";
+   ctx.fillText(`📊 تقرير إنجاز شهر ${arabicMonths[viewMonth]} ${toEnglishDigits(viewYear)}`, 400, 60);
+
+   for (let i = 0; i < daysInMonth; i++) {
+     const col = i % cols;
+     const row = Math.floor(i / cols);
+     const x = startX + col * (boxWidth + gap);
+     const y = startY + row * (boxHeight + gap);
+
+     const monthStr = String(viewMonth + 1).padStart(2, '0');
+     const dayStr = String(i + 1).padStart(2, '0');
+     const targetDateStr = `${viewYear}-${monthStr}-${dayStr}`;
+
+     const dayData = monthlyLog.find(d => d.date === targetDateStr);
+
+     if (dayData) {
+       ctx.fillStyle = dayData.status === 'green' ? "#10b981" : "#ef4444";
+     } else {
+       ctx.fillStyle = "#1e293b";
+     }
+
+     drawRoundedBox(ctx, x, y, boxWidth, boxHeight, 10);
+
+     ctx.fillStyle = "#ffffff";
+     ctx.font = "bold 18px system-ui, sans-serif";
+     ctx.fillText(`يوم ${toEnglishDigits(i + 1)}`, x + boxWidth / 2, y + 28);
+
+     ctx.font = "15px system-ui, sans-serif";
+     const valText = dayData ? `${toEnglishDigits(dayData.calories)} سعرة` : "-";
+     ctx.fillText(valText, x + boxWidth / 2, y + 54);
+   }
+
+   try {
+     const imageURI = canvas.toDataURL("image/png");
+     const link = document.createElement("a");
+     link.download = `health_report_${viewYear}_${viewMonth + 1}.png`;
+     link.href = imageURI;
+     document.body.appendChild(link);
+     link.click();
+     document.body.removeChild(link);
+   } catch (e) {
+     alert("حدث خطأ أثناء إنشاء الصورة.");
+   }
+ }
+
+ function getTodayWaterKey() { return `health_water_${getLocalDateStr()}`; }
+
+ function addWaterCup() {
+   const key = getTodayWaterKey();
+   let cups = Number(localStorage.getItem(key)) || 0;
+   cups += 1;
+   localStorage.setItem(key, cups);
+   updateWaterUI();
+ }
+
+ function resetWaterCups() {
+   const key = getTodayWaterKey();
+   localStorage.setItem(key, 0);
+   updateWaterUI();
+ }
+
+ function updateWaterUI() {
+   const key = getTodayWaterKey();
+   const cups = Number(localStorage.getItem(key)) || 0;
+   const elem = document.getElementById('waterCount');
+   if (elem) elem.innerText = toEnglishDigits(cups);
+ }
+
+ function initSpeechRecognition() {
+   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+   if (!SpeechRecognition) {
+     alert("عذراً، خاصية التعرف على الصوت غير مدعومة في هذا المتصفح.");
+     return null;
+   }
+
+   const rec = new SpeechRecognition();
+   rec.lang = 'ar-SA';
+   rec.continuous = false;
+   rec.interimResults = false;
+
+   rec.onstart = function() {
+     isListening = true;
+     const micBtn = document.getElementById('micBtn');
+     micBtn.classList.add('recording');
+     document.getElementById('micBtnText').innerText = "🔴 جاري الاستماع.. اتكلم الآن";
+   };
+
+   rec.onresult = function(event) {
+     const transcript = event.results[0][0].transcript;
+     const textarea = document.getElementById('mealInput');
+     textarea.value = textarea.value ? textarea.value + " " + transcript : transcript;
+   };
+
+   rec.onerror = function(e) { stopListening(); recognition = null; };
+   rec.onend = function() { stopListening(); };
+
+   return rec;
+ }
+
+ function toggleVoiceInput() {
+   if (!recognition) { recognition = initSpeechRecognition(); }
+   if (!recognition) return;
+
+   if (isListening) {
+     try { recognition.stop(); } catch(e) {}
+     stopListening();
+   } else {
+     try { recognition.start(); } catch (err) { stopListening(); recognition = null; }
+   }
+ }
+
+ function stopListening() {
+   isListening = false;
+   const micBtn = document.getElementById('micBtn');
+   if (micBtn) {
+     micBtn.classList.remove('recording');
+     document.getElementById('micBtnText').innerText = "🎤 إملي الوجبة بالصوت";
+   }
+ }
+
+ function toggleTheme() {
+   document.documentElement.classList.toggle('light-theme');
+   document.body.classList.toggle('light-theme');
+   const isLight = document.body.classList.contains('light-theme');
+   localStorage.setItem('health_app_theme', isLight ? 'light' : 'dark');
+ }
+
+ function loadSavedTheme() {
+   const savedTheme = localStorage.getItem('health_app_theme');
+   if (savedTheme === 'light') {
+     document.documentElement.classList.add('light-theme');
+     document.body.classList.add('light-theme');
+   }
+ }
+
+ function previewSelectedImage(event) {
+   const file = event.target.files[0];
+   if (file) {
+     imageMimeType = file.type;
+     const reader = new FileReader();
+     reader.onload = function(e) {
+       const img = new Image();
+       img.onload = function() {
+         const canvas = document.createElement('canvas');
+         const MAX_WIDTH = 1600;
+         const MAX_HEIGHT = 1600;
+         let width = img.width;
+         let height = img.height;
+
+         if (width > height) {
+           if (width > MAX_WIDTH) {
+             height *= MAX_WIDTH / width;
+             width = MAX_WIDTH;
+           }
+         } else {
+           if (height > MAX_HEIGHT) {
+             width *= MAX_HEIGHT / height;
+             height = MAX_HEIGHT;
+           }
+         }
+
+         canvas.width = width;
+         canvas.height = height;
+         const ctx = canvas.getContext('2d');
+         ctx.drawImage(img, 0, 0, width, height);
+
+         const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.90);
+         
+         document.getElementById('imagePreview').src = compressedDataUrl;
+         document.getElementById('imagePreviewWrapper').style.display = 'block';
+         base64ImageData = compressedDataUrl.split(',')[1];
+         imageMimeType = 'image/jpeg';
+       };
+       img.src = e.target.result;
+     };
+     reader.readAsDataURL(file);
+   }
+ }
+
+ function clearSelectedImage() {
+   const galInput = document.getElementById('galleryFileInput');
+   if (galInput) galInput.value = "";
+   const imgPrev = document.getElementById('imagePreview');
+   if (imgPrev) imgPrev.src = "";
+   document.getElementById('imagePreviewWrapper').style.display = 'none';
+   base64ImageData = null;
+   imageMimeType = "";
+ }
+
+ // ==================== 7. المحرك الرئيسي للذكاء الاصطناعي (مع المسح المباشر) ====================
+ function setScanningUIState(isScanning) {
+   const inputWrapper = document.getElementById('inputWrapper');
+   const btn = document.getElementById('analyzeBtn');
+
+   if (isScanning) {
+     if (inputWrapper) inputWrapper.classList.add('scanning');
+     if (btn) {
+       btn.classList.add('scanning-state');
+       btn.innerText = "⚡ جاري المسح والفحص المباشر...";
+     }
+   } else {
+     if (inputWrapper) inputWrapper.classList.remove('scanning');
+     if (btn) {
+       btn.classList.remove('scanning-state');
+       btn.innerText = "تحليل الوجبة وإضافتها بالمحرك الموسوعي";
+     }
+   }
+ }
+
+ async function analyzeMeal() {
+   if (document.activeElement) {
+     document.activeElement.blur();
+   }
+
+   const activeKey = getActiveApiKey();
+
+   if (!activeKey || activeKey.trim() === "") {
+     alert("⚠️ لم يتم العثور على مفتاح Gemini API!\nيرجى فتح القائمة الجانبية ☰ 👈 (🔑 إعدادات المفتاح والأمان) ووضع المفتاح الخاص بك أولاً.");
+     openKeyAuthModal();
+     return;
+   }
+
+   const inputText = document.getElementById('mealInput').value.trim();
+   const resultCard = document.getElementById('resultCard');
+
+   if (!inputText && !base64ImageData) {
+     alert("يرجى كتابة الوجبة أو إملائها بالصوت أو التقاط صورة لها!");
+     return;
+   }
+
+   if (!window.navigator.onLine) {
+     alert("لا يوجد اتصال بالإنترنت. يرجى الفحص والمحاولة مجدداً.");
+     return;
+   }
+
+   setScanningUIState(true);
+   resultCard.style.display = 'none';
+
+   const masterSystemPrompt = `أنت "محرك التغذية الإكلينيكية والتحليل المترولوجي المتقدم"، والمصمم للعمل بأعلى مستويات الدقة المعتمدة على قاعدة بيانات وزارة الزراعة الأمريكية (USDA FoodData Central).
+
+تتلخص مهمتك في تفكيك وتحليل أي وجبة غذائية (نص، صوت، صورة طعام، أو صورة جدول غلاف) وفق البروتوكول الموسوعي الموحد التالي:
+
+1. الترجمة المترولوجية والمكاييل الشعبية:
+   - "صحن/طبق وسط": 250g للأرز/المعكرونة، 300ml للشوربات.
+   - "رغيف خبز عربي كبير": 100g (260 سعرة) | "رغيف صغير/كماج": 50g.
+   - "كف يد لحم/دجاج": 90g إلى 100g مطبوخ.
+   - "قبضة مكسرات": 30g | "ملعقة زيت/سمن": 13g (120 سعرة).
+
+2. التشريح واقتطاع أوزان العظام:
+   - إذا تم ذكر قطع بعظمها (مثل: "فخذ دجاج بعظمه"، "ريش غنم"): اقتطع 25% إلى 30% تلقائياً كوزن غير قابل للأكل (Bone-in Extraction).
+   - "صدور الدجاج": بروتين مرتفع ودهون منخفضة | "أفخاذ/أجنحة مع الجلد": زيادة 35% دهون.
+
+3. معادلات الطهي والزيوت المخفية:
+   - الأرز/المعكرونة المطبوخة: افترض وجود 5g زيت/سمن لكل 200g أرز مطبوخ تلقائياً بشكل افتراضي.
+   - الأطعمة المقلية: أضف امتصاصاً آلياً للزيت بمقدار 10g دهون (90 سعرة) لكل 100g مقلي.
+
+4. معالجة صور الغلاف وجداول الحقائق:
+   - استخرج الوزن الصافي الكلي للعبوة (Net Weight).
+   - احسب القيمة الحقيقية للعبوة بالكامل: [القيمة للعبوة = (القيمة المكتوبة لكل 100g ÷ 100) × الوزن الصافي بالجرام].
+
+5. هيكلية المخرجات الصارمة:
+   إرجاع النتيجة حصراً بصيغة JSON نقي دون أي Markdown ودون أي نص خارجي بالهيكل التالي:
+{
+  "meal_name": "اسم الوجبة الشامل والمحدد باللغة العربية الفصحى",
+  "calories": number,
+  "protein": number,
+  "carbs": number,
+  "fats": number,
+  "fiber": number,
+  "sugar": number,
+  "net_carbs": number,
+  "sodium_mg": number,
+  "ingredients_breakdown": "تفكيك المكونات التفصيلي بالجرامات والسعرات (مثال: أرز أبيض 200g [260 سعرة] + صدر دجاج 150g [240 سعرة])",
+  "cooking_assumptions": "افتراضات الطهي والزيوت والعظام",
+  "health_score": "8.5/10",
+  "notes": "ملاحظة تغذوية إكلينيكية موجزة"
+}`;
+
+   const contentsParts = [];
+   if (inputText) {
+     contentsParts.push({ text: `وصف الوجبة/المدخلات: ${inputText}` });
+   }
+
+   if (base64ImageData) {
+     contentsParts.push({
+       inlineData: {
+         mimeType: imageMimeType,
+         data: base64ImageData
+       }
+     });
+   }
+
+   let lastErrorMessage = "";
+
+   for (let modelName of CONFIG.MODELS) {
+     try {
+       const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${activeKey}`;
+       
+       const response = await fetch(url, {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({
+           systemInstruction: {
+             parts: [{ text: masterSystemPrompt }]
+           },
+           contents: [{ role: "user", parts: contentsParts }],
+           generationConfig: {
+             responseMimeType: "application/json"
+           }
+         })
+       });
+
+       const data = await response.json();
+
+       if (response.ok && data.candidates && data.candidates[0]) {
+         const rawText = data.candidates[0].content.parts[0].text;
+         
+         let cleanJsonStr = rawText;
+         const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+         if (jsonMatch) {
+           cleanJsonStr = jsonMatch[0];
+         }
+
+         const parsedData = JSON.parse(cleanJsonStr);
+
+         currentAnalyzedMeal = parsedData;
+         displayAnalysisResult(parsedData, modelName);
+         setScanningUIState(false);
+         return;
+       } else {
+         lastErrorMessage = data.error?.message || JSON.stringify(data.error || data);
+         console.error(`خطأ في النموذج ${modelName}: ${lastErrorMessage}`);
+       }
+     } catch (e) {
+       lastErrorMessage = e.message;
+       console.warn(`فشل الاتصال بالنموذج ${modelName}: ${e.message}`);
+     }
+   }
+
+   setScanningUIState(false);
+   alert(`تعذر تحليل الوجبة.\nسبب الخطأ: ${lastErrorMessage || "يرجى التأكد من صحة مفتاح API المخزن أو جودة الاتصال."}`);
+ }
+
+ function displayAnalysisResult(data, usedModel) {
+   document.getElementById('resMealName').innerText = escapeHTML(data.meal_name || "وجبة بدون اسم");
+   document.getElementById('resCals').innerText = toEnglishDigits(data.calories || 0) + " سعرة حرارية";
+   document.getElementById('resProtein').innerText = toEnglishDigits(data.protein || 0) + "g";
+   document.getElementById('resNetCarbs').innerText = toEnglishDigits(data.net_carbs || data.carbs || 0) + "g";
+   document.getElementById('resFats').innerText = toEnglishDigits(data.fats || 0) + "g";
+
+   document.getElementById('resFiber').innerText = toEnglishDigits(data.fiber || 0) + "g";
+   document.getElementById('resSugar').innerText = toEnglishDigits(data.sugar || 0) + "g";
+   document.getElementById('resSodium').innerText = toEnglishDigits(data.sodium_mg || 0) + "mg";
+
+   document.getElementById('resBreakdown').innerText = escapeHTML(data.ingredients_breakdown || "تم تقدير المكونات بشكل تجميعي.");
+   document.getElementById('resAssumptions').innerText = escapeHTML(data.cooking_assumptions || "طهي وتحضير قياسي.");
+   document.getElementById('resHealthScore').innerText = escapeHTML(data.health_score || "8.0/10");
+   document.getElementById('resNotes').innerText = "💡 " + escapeHTML(data.notes || "تحليل معتمد بواسطة " + usedModel);
+
+   document.getElementById('resultCard').style.display = 'block';
+   document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth' });
+ }
+
+ function dismissCurrentAnalysis() {
+   document.getElementById('resultCard').style.display = 'none';
+   currentAnalyzedMeal = null;
+   document.getElementById('mealInput').value = "";
+   clearSelectedImage();
+ }
+
+ function getTodayKey() { return `health_meals_${getLocalDateStr()}`; }
+ function getTodayTrashKey() { return `health_trash_${getLocalDateStr()}`; }
+
+ function saveMealToDailyHistory() {
+   if (!currentAnalyzedMeal) return;
+
+   const key = getTodayKey();
+   let meals = safeJSONParse(key, []);
+   
+   meals.push({
+     id: Date.now(),
+     name: currentAnalyzedMeal.meal_name || "وجبة",
+     cals: Number(currentAnalyzedMeal.calories) || 0,
+     protein: Number(currentAnalyzedMeal.protein) || 0,
+     carbs: Number(currentAnalyzedMeal.net_carbs || currentAnalyzedMeal.carbs) || 0,
+     fats: Number(currentAnalyzedMeal.fats) || 0,
+     time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+   });
+
+   localStorage.setItem(key, JSON.stringify(meals));
+   
+   document.getElementById('mealInput').value = "";
+   clearSelectedImage();
+   document.getElementById('resultCard').style.display = 'none';
+   currentAnalyzedMeal = null;
+
+   renderDailySummaryAndHistory();
+ }
+
+ function openEditMealModal(meal, dateStr = "") {
+   document.getElementById('editMealId').value = meal.id;
+   document.getElementById('editMealDateStr').value = dateStr;
+   document.getElementById('editMealName').value = meal.name;
+   document.getElementById('editMealCals').value = toEnglishDigits(meal.cals);
+   document.getElementById('editMealProtein').value = toEnglishDigits(meal.protein);
+   document.getElementById('editMealCarbs').value = toEnglishDigits(meal.carbs);
+   document.getElementById('editMealFats').value = toEnglishDigits(meal.fats);
+
+   document.getElementById('editMealModal').classList.add('active');
+   setModalScrollLock(true);
+ }
+
+ function closeEditMealModal() {
+   document.getElementById('editMealModal').classList.remove('active');
+   setModalScrollLock(false);
+ }
+
+ function saveEditedMeal() {
+   const mealId = Number(document.getElementById('editMealId').value);
+   const dateStr = document.getElementById('editMealDateStr').value;
+
+   if (dateStr) {
+     let monthlyLog = getMonthlyLog();
+     const dayIndex = monthlyLog.findIndex(d => d.date === dateStr);
+
+     if (dayIndex !== -1) {
+       const mealIndex = monthlyLog[dayIndex].meals.findIndex(m => m.id === mealId);
+       if (mealIndex !== -1) {
+         monthlyLog[dayIndex].meals[mealIndex].name = document.getElementById('editMealName').value.trim() || "وجبة";
+         monthlyLog[dayIndex].meals[mealIndex].cals = Number(toEnglishDigits(document.getElementById('editMealCals').value)) || 0;
+         monthlyLog[dayIndex].meals[mealIndex].protein = Number(toEnglishDigits(document.getElementById('editMealProtein').value)) || 0;
+         monthlyLog[dayIndex].meals[mealIndex].carbs = Number(toEnglishDigits(document.getElementById('editMealCarbs').value)) || 0;
+         monthlyLog[dayIndex].meals[mealIndex].fats = Number(toEnglishDigits(document.getElementById('editMealFats').value)) || 0;
+
+         let newTotal = 0;
+         monthlyLog[dayIndex].meals.forEach(m => newTotal += Number(m.cals) || 0);
+         monthlyLog[dayIndex].calories = newTotal;
+         monthlyLog[dayIndex].status = newTotal <= (monthlyLog[dayIndex].goal || CONFIG.DEFAULT_GOAL) ? 'green' : 'red';
+
+         localStorage.setItem('health_monthly_log', JSON.stringify(monthlyLog));
+         
+         const dayNum = new Date(dateStr).getDate();
+         openDayDetailModal(monthlyLog[dayIndex], dayNum, dateStr);
+         renderMonthlyGrid();
+       }
+     }
+   } else {
+     const key = getTodayKey();
+     let meals = safeJSONParse(key, []);
+
+     const index = meals.findIndex(m => m.id === mealId);
+     if (index !== -1) {
+       meals[index].name = document.getElementById('editMealName').value.trim() || "وجبة";
+       meals[index].cals = Number(toEnglishDigits(document.getElementById('editMealCals').value)) || 0;
+       meals[index].protein = Number(toEnglishDigits(document.getElementById('editMealProtein').value)) || 0;
+       meals[index].carbs = Number(toEnglishDigits(document.getElementById('editMealCarbs').value)) || 0;
+       meals[index].fats = Number(toEnglishDigits(document.getElementById('editMealFats').value)) || 0;
+
+       localStorage.setItem(key, JSON.stringify(meals));
+       renderDailySummaryAndHistory();
+     }
+   }
+   closeEditMealModal();
+ }
+
+ function deleteSingleMeal(mealId, showToast = true) {
+   const mealKey = getTodayKey();
+   const trashKey = getTodayTrashKey();
+
+   let meals = safeJSONParse(mealKey, []);
+   let trash = safeJSONParse(trashKey, []);
+
+   const mealIndex = meals.findIndex(m => m.id === mealId);
+   if (mealIndex === -1) return;
+
+   const [deletedMeal] = meals.splice(mealIndex, 1);
+   trash.push(deletedMeal);
+
+   localStorage.setItem(mealKey, JSON.stringify(meals));
+   localStorage.setItem(trashKey, JSON.stringify(trash));
+
+   renderDailySummaryAndHistory();
+   renderTrashList();
+
+   if (showToast) { triggerUndoToast(deletedMeal); }
+ }
+
+ function triggerUndoToast(meal) {
+   const toast = document.getElementById('undoToast');
+   const text = document.getElementById('undoToastText');
+   if (!toast || !text) return;
+
+   lastDeletedMealId = meal.id;
+   text.innerText = `تم النقل للمحذوفات 🗑️`;
+   toast.style.display = 'flex';
+   toast.style.transform = 'translate3d(-50%, 0, 0)';
+   toast.style.opacity = '1';
+
+   if (undoTimer) clearTimeout(undoTimer);
+   undoTimer = setTimeout(() => {
+     toast.style.display = 'none';
+     lastDeletedMealId = null;
+   }, CONFIG.TOAST_TIMEOUT);
+ }
+
+ function undoLastDelete() {
+   if (!lastDeletedMealId) return;
+   restoreMealFromTrash(lastDeletedMealId);
+   const toast = document.getElementById('undoToast');
+   if (toast) toast.style.display = 'none';
+   if (undoTimer) clearTimeout(undoTimer);
+   lastDeletedMealId = null;
+ }
+
+ function restoreMealFromTrash(mealId) {
+   const mealKey = getTodayKey();
+   const trashKey = getTodayTrashKey();
+
+   let meals = safeJSONParse(mealKey, []);
+   let trash = safeJSONParse(trashKey, []);
+
+   const trashIndex = trash.findIndex(m => m.id === mealId);
+   if (trashIndex === -1) return;
+
+   const [restoredMeal] = trash.splice(trashIndex, 1);
+   meals.push(restoredMeal);
+
+   localStorage.setItem(mealKey, JSON.stringify(meals));
+   localStorage.setItem(trashKey, JSON.stringify(trash));
+
+   renderDailySummaryAndHistory();
+   renderTrashList();
+ }
+
+ function deletePermanentlyFromTrash(mealId) {
+   const trashKey = getTodayTrashKey();
+   let trash = safeJSONParse(trashKey, []);
+   trash = trash.filter(m => m.id !== mealId);
+   localStorage.setItem(trashKey, JSON.stringify(trash));
+   renderTrashList();
+ }
+
+ function clearEntireTrash() {
+   if (confirm("هل أنت تأكد من مسح جميع عناصر السلة نهائياً؟")) {
+     localStorage.removeItem(getTodayTrashKey());
+     renderTrashList();
+   }
+ }
+
+ function renderTrashList() {
+   const trashKey = getTodayTrashKey();
+   const trash = safeJSONParse(trashKey, []);
+   const trashList = document.getElementById('trashList');
+   if (!trashList) return;
+
+   trashList.innerHTML = "";
+   if (trash.length === 0) {
+     trashList.innerHTML = `<p style="font-size: 0.8rem; color: var(--text-sub); text-align: center;">السلة فارغة حالياً</p>`;
+     return;
+   }
+
+   trash.forEach(m => {
+     const item = document.createElement('div');
+     item.style.cssText = "display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed var(--glass-border); font-size: 0.85rem;";
+     item.innerHTML = `
+       <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 55%;">
+         <span style="font-weight: bold;">${escapeHTML(m.name)}</span>
+         <span style="font-size: 0.72rem; color: var(--text-sub); margin-right: 2px;">(${toEnglishDigits(m.cals)}س)</span>
+       </div>
+       <div style="display: flex; gap: 4px; align-items: center;">
+         <button style="background: transparent; border: 1px solid var(--accent-primary); color: var(--accent-primary); padding: 3px 8px; border-radius: 8px; cursor: pointer; font-size: 0.72rem; font-weight: bold;" onclick="restoreMealFromTrash(${m.id})">استعادة 🔄</button>
+         <button style="background: transparent; border: 1px solid var(--accent-fats); color: var(--accent-fats); padding: 3px 8px; border-radius: 8px; cursor: pointer; font-size: 0.72rem; font-weight: bold;" onclick="deletePermanentlyFromTrash(${m.id})" title="حذف نهائي">✕</button>
+       </div>
+     `;
+     trashList.appendChild(item);
+   });
+
+   const clearBtn = document.createElement('button');
+   clearBtn.className = 'sidebar-btn';
+   clearBtn.style.cssText = 'color: var(--accent-fats); border-color: var(--accent-fats); margin-top: 10px; font-size: 0.78rem; padding: 8px; width: 100%;';
+   clearBtn.innerHTML = '🧹 تفريغ السلة نهائياً';
+   clearBtn.onclick = clearEntireTrash;
+   trashList.appendChild(clearBtn);
+ }
+
+ function renderDailySummaryAndHistory() {
+   const key = getTodayKey();
+   const meals = safeJSONParse(key, []);
+   const historyList = document.getElementById('historyList');
+   const targetGoal = getStoredCalorieGoal();
+
+   let totalCals = 0;
+   let totalProtein = 0;
+   let totalCarbs = 0;
+   let totalFats = 0;
+
+   historyList.innerHTML = "";
+
+   if (meals.length === 0) {
+     historyList.innerHTML = `<p style="text-align: center; color: var(--text-sub); font-size: 0.85rem; padding: 14px 0;">لم تقم بإضافة أي وجبة اليوم بعد.</p>`;
+   } else {
+     meals.forEach(m => {
+       totalCals += Number(m.cals) || 0;
+       totalProtein += Number(m.protein) || 0;
+       totalCarbs += Number(m.carbs) || 0;
+       totalFats += Number(m.fats) || 0;
+
+       const wrapper = document.createElement('div');
+       wrapper.className = 'history-item-wrapper';
+
+       const bgEdit = document.createElement('div');
+       bgEdit.className = 'swipe-edit-bg';
+       bgEdit.innerHTML = `<button class="swipe-edit-btn" id="editBtn_${m.id}">تعديل ✏️</button>`;
+
+       const item = document.createElement('div');
+       item.className = 'history-item';
+       item.innerHTML = `
+         <div class="history-info">
+           <div class="name">${escapeHTML(m.name)}</div>
+           <div class="sub">⏱️ ${toEnglishDigits(escapeHTML(m.time))} | بروتين: ${toEnglishDigits(m.protein)}g | كارب: ${toEnglishDigits(m.carbs)}g</div>
+         </div>
+         <div class="history-actions">
+           <div class="history-cals">${toEnglishDigits(m.cals)} سعرة</div>
+           <button class="btn-delete-item" onclick="deleteSingleMeal(${m.id})" title="حذف الوجبة">🗑️</button>
+         </div>
+       `;
+
+       let startItemX = 0;
+       item.addEventListener('touchstart', function(e) {
+         startItemX = e.touches[0].clientX;
+         item.style.transition = 'none';
+       }, { passive: true });
+
+       item.addEventListener('touchmove', function(e) {
+         let currentX = e.touches[0].clientX;
+         let diff = currentX - startItemX;
+         if (diff < 0 && diff > -100) {
+           item.style.transform = `translateX(${diff}px)`;
+           let progress = Math.min(1, Math.abs(diff) / 50);
+           bgEdit.style.opacity = progress;
+         }
+       }, { passive: true });
+
+       item.addEventListener('touchend', function(e) {
+         let endX = e.changedTouches[0].clientX;
+         let diff = endX - startItemX;
+         item.style.transition = 'transform 0.2s ease';
+
+         if (diff < -50) {
+           item.style.transform = 'translateX(-85px)';
+           bgEdit.style.opacity = '1';
+         } else {
+           item.style.transform = 'translateX(0)';
+           bgEdit.style.opacity = '0';
+         }
+       }, { passive: true });
+
+       wrapper.appendChild(bgEdit);
+       wrapper.appendChild(item);
+       historyList.appendChild(wrapper);
+
+       setTimeout(() => {
+         const btn = document.getElementById(`editBtn_${m.id}`);
+         if (btn) {
+           btn.onclick = function() {
+             item.style.transform = 'translateX(0)';
+             bgEdit.style.opacity = '0';
+             openEditMealModal(m);
+           };
+         }
+       }, 0);
+     });
+   }
+
+   document.getElementById('dailyCals').innerText = toEnglishDigits(totalCals);
+   document.getElementById('targetCalsDisplay').innerText = toEnglishDigits(targetGoal);
+   document.getElementById('goalInput').value = toEnglishDigits(targetGoal);
+
+   document.getElementById('heroTotalProtein').innerText = toEnglishDigits(Math.round(totalProtein)) + "g";
+   document.getElementById('heroTotalCarbs').innerText = toEnglishDigits(Math.round(totalCarbs)) + "g";
+   document.getElementById('heroTotalFats').innerText = toEnglishDigits(Math.round(totalFats)) + "g";
+   
+   const percentage = Math.min(100, Math.round((totalCals / targetGoal) * 100));
+   const ringFill = document.getElementById('calRingFill');
+   if (ringFill) {
+     const circumference = 326.72;
+     const offset = circumference - (percentage / 100) * circumference;
+     ringFill.style.strokeDashoffset = offset;
+   }
+ }
+
+ function clearDailyHistory() {
+   if (confirm("هل أنت تأكد من مسح سجل وجبات اليوم بالكامل؟")) {
+     localStorage.removeItem(getTodayKey());
+     renderDailySummaryAndHistory();
+     closeSidebar();
+   }
+ }
+
+ window.onload = function() {
+   // تسجيل الـ Service Worker لتفعيل تطبيق PWA والعمل بدون إنترنت
+   if ('serviceWorker' in navigator) {
+     navigator.serviceWorker.register('sw.js')
+       .then(reg => console.log('PWA Service Worker Ready!', reg.scope))
+       .catch(err => console.log('Service Worker Fail:', err));
+   }
+
+   checkAndAutoArchivePastDays();
+   cleanOldLocalStorageData();
+   loadSavedTheme();
+   renderDailySummaryAndHistory();
+   renderMonthlyGrid();
+   updateWaterUI();
+   renderTrashList();
+   initGridSwipe();
+   initToastSwipe();
+ };
+</script>
+
+</body>
+</html>
