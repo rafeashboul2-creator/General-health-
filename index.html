@@ -14,16 +14,17 @@
  <style>
  /* ==================== نظام الألوان والتصميم الزجاجي العالمي (Glassmorphism & Obsidian Dark) ==================== */
   /* منع انبثاق بحث جوجل عند النقر على النصوص */
+/* منع انبثاق بحث جوجل وقوائم اللمس المطول نهائياً */
 body {
   -webkit-user-select: none;
   user-select: none;
+  -webkit-touch-callout: none;
 }
 
-input, textarea, .history-info {
+input, textarea {
   -webkit-user-select: text;
   user-select: text;
 }
-
  :root {
    --bg-body: #080c14;
    --bg-card: rgba(30, 41, 59, 0.55);
