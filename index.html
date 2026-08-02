@@ -13,6 +13,17 @@
  <title>المساعد الصحي الذكي - Ultra UX Edition</title>
  <style>
  /* ==================== نظام الألوان والتصميم الزجاجي العالمي (Glassmorphism & Obsidian Dark) ==================== */
+  /* منع انبثاق بحث جوجل عند النقر على النصوص */
+body {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+input, textarea, .history-info {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
  :root {
    --bg-body: #080c14;
    --bg-card: rgba(30, 41, 59, 0.55);
