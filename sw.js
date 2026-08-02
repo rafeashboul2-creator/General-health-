@@ -1,4 +1,4 @@
-const CACHE_NAME = 'health-app-v4';
+const CACHE_NAME = 'health-app-v5';
 const assetsToCache = [
   './index.html',
   './manifest.json',
